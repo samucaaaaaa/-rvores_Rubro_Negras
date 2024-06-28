@@ -1,66 +1,44 @@
-#include <iostream>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
 
-using namespace std;
+typedef enum { RED, BLACK } Color;
 
-enum Color {RED, BLACK};
-
-template <typename T>
-struct Node
-{
-    T payload;
+typedef struct Node {
+    int data;
     Color color;
-    Node* ptrLeft;
-    Node* ptrRight;
-    Node* parent;
-};
+    struct Node *left, *right, *parent;
+} Node;
 
-template <typename T>
-Node<T>* createNode(T payload) 
-{
-    Node<T>* newNode = (Node<T>*) malloc(sizeof(Node<T>));
-    if (newNode != nullptr) 
-    {
-        newNode->payload = payload;
-        newNode->color = RED;
-        newNode->ptrLeft = nullptr;
-        newNode->ptrRight = nullptr;
-        newNode->parent = nullptr;
-    }
+Node* createNode(int data) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->data = data;
+    newNode->color = RED;
+    newNode->left = newNode->right = newNode->parent = NULL;
     return newNode;
 }
 
-template <typename T>
-void rotateLeft(Node<T>*& root, Node<T>*& node) 
-{
-    Node<T>* rightChild = node->ptrRight;
-    node->ptrRight = rightChild->ptrLeft;
-
-    if (node->ptrRight != nullptr) 
-    {
-        node->ptrRight->parent = node;
-    }
-
-    rightChild->parent = node->parent;
-
-    if (node->parent == nullptr) 
-    {
-        root = rightChild;
-    } 
-    else if (node == node->parent->ptrLeft) 
-    {
-        node->parent->ptrLeft = rightChild;
-    } 
-    else 
-    {
-        node->parent->ptrRight = rightChild;
-    }
-
-    rightChild->ptrLeft = node;
-    node->parent = rightChild;
+Node* rotateLeft(Node* root, Node* x) {
+    Node* y = x->right;
+    x->right = y->left;
+    if (y->left != NULL) y->left->parent = x;
+    y->parent = x->parent;
+    if (x->parent == NULL) root = y;
+    else if (x == x->parent->left) x->parent->left = y;
+    else x->parent->right = y;
+    y->left = x;
+    x->parent = y;
+    return root;
 }
 
-int main() 
-{
-    return 0;
+Node* rotateRight(Node* root, Node* x) {
+    Node* y = x->left;
+    x->left = y->right;
+    if (y->right != NULL) y->right->parent = x;
+    y->parent = x->parent;
+    if (x->parent == NULL) root = y;
+    else if (x == x->parent->right) x->parent->right = y;
+    else x->parent->left = y;
+    y->right = x;
+    x->parent = y;
+    return root;
 }
