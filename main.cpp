@@ -11,6 +11,9 @@ typedef struct Node {
 
 Node* createNode(int data) {
     Node* newNode = (Node*)malloc(sizeof(Node));
+    if (!newNode) {
+        exit(1);
+    }
     newNode->data = data;
     newNode->color = RED;
     newNode->left = newNode->right = newNode->parent = NULL;
@@ -19,6 +22,7 @@ Node* createNode(int data) {
 
 Node* rotateLeft(Node* root, Node* x) {
     Node* y = x->right;
+    if (!y) return root; // Safety check
     x->right = y->left;
     if (y->left != NULL) y->left->parent = x;
     y->parent = x->parent;
@@ -32,6 +36,7 @@ Node* rotateLeft(Node* root, Node* x) {
 
 Node* rotateRight(Node* root, Node* x) {
     Node* y = x->left;
+    if (!y) return root; // Safety check
     x->left = y->right;
     if (y->right != NULL) y->right->parent = x;
     y->parent = x->parent;
@@ -133,49 +138,51 @@ Node* transplant(Node* root, Node* u, Node* v) {
 
 Node* deleteFixUp(Node* root, Node* x) {
     while (x != root && (x == NULL || x->color == BLACK)) {
-        if (x == x->parent->left) {
+        if (x != NULL && x->parent != NULL && x == x->parent->left) {
             Node* w = x->parent->right;
-            if (w->color == RED) {
+            if (w != NULL && w->color == RED) {
                 w->color = BLACK;
                 x->parent->color = RED;
                 root = rotateLeft(root, x->parent);
                 w = x->parent->right;
             }
-            if ((w->left == NULL || w->left->color == BLACK) && (w->right == NULL || w->right->color == BLACK)) {
-                w->color = RED;
+            if ((w == NULL || w->left == NULL || w->left->color == BLACK) && 
+                (w == NULL || w->right == NULL || w->right->color == BLACK)) {
+                if (w != NULL) w->color = RED;
                 x = x->parent;
             } else {
-                if (w->right == NULL || w->right->color == BLACK) {
+                if (w != NULL && (w->right == NULL || w->right->color == BLACK)) {
                     if (w->left != NULL) w->left->color = BLACK;
-                    w->color = RED;
+                    if (w != NULL) w->color = RED;
                     root = rotateRight(root, w);
                     w = x->parent->right;
                 }
-                w->color = x->parent->color;
+                if (w != NULL) w->color = x->parent->color;
                 x->parent->color = BLACK;
                 if (w->right != NULL) w->right->color = BLACK;
                 root = rotateLeft(root, x->parent);
                 x = root;
             }
         } else {
-            Node* w = x->parent->left;
-            if (w->color == RED) {
+            Node* w = x != NULL && x->parent != NULL ? x->parent->left : NULL;
+            if (w != NULL && w->color == RED) {
                 w->color = BLACK;
-                x->parent->color = RED;
+                if (x != NULL && x->parent != NULL) x->parent->color = RED;
                 root = rotateRight(root, x->parent);
                 w = x->parent->left;
             }
-            if ((w->right == NULL || w->right->color == BLACK) && (w->left == NULL || w->left->color == BLACK)) {
-                w->color = RED;
+            if ((w == NULL || w->right == NULL || w->right->color == BLACK) && 
+                (w == NULL || w->left == NULL || w->left->color == BLACK)) {
+                if (w != NULL) w->color = RED;
                 x = x->parent;
             } else {
-                if (w->left == NULL || w->left->color == BLACK) {
+                if (w != NULL && (w->left == NULL || w->left->color == BLACK)) {
                     if (w->right != NULL) w->right->color = BLACK;
                     w->color = RED;
                     root = rotateLeft(root, w);
                     w = x->parent->left;
                 }
-                w->color = x->parent->color;
+                if (w != NULL) w->color = x->parent->color;
                 x->parent->color = BLACK;
                 if (w->left != NULL) w->left->color = BLACK;
                 root = rotateRight(root, x->parent);
@@ -189,7 +196,7 @@ Node* deleteFixUp(Node* root, Node* x) {
 
 Node* deleteNode(Node* root, Node* z) {
     Node* y = z;
-    Node* x;
+    Node* x = NULL;
     Color yOriginalColor = y->color;
     if (z->left == NULL) {
         x = z->right;
@@ -206,11 +213,11 @@ Node* deleteNode(Node* root, Node* z) {
         } else {
             root = transplant(root, y, y->right);
             y->right = z->right;
-            y->right->parent = y;
+            if (y->right != NULL) y->right->parent = y;
         }
         root = transplant(root, z, y);
         y->left = z->left;
-        y->left->parent = y;
+        if (y->left != NULL) y->left->parent = y;
         y->color = z->color;
     }
     if (yOriginalColor == BLACK) root = deleteFixUp(root, x);
@@ -252,30 +259,26 @@ void freeTree(Node* root) {
 int main() {
     Node* root = NULL;
 
-    // Inserção de nós
     root = insert(root, createNode(10));
     root = insert(root, createNode(20));
     root = insert(root, createNode(30));
     root = insert(root, createNode(15));
     root = insert(root, createNode(25));
 
-    // Percurso em ordem simétrica
     printf("Inorder traversal: ");
     inorder(root);
     printf("\n");
 
-    // Verificação da árvore rubro-negra
     if (validateRedBlackTree(root))
         printf("The tree is a valid red-black tree.\n");
     else
         printf("The tree is NOT a valid red-black tree.\n");
 
-    // Buscar um nó
-    Node* found = search(root, 15);
+    Node* found = search(root, 25);
     if (found != NULL)
-        printf("Node with data 15 found.\n");
+        printf("Node with data 25 found.\n");
     else
-        printf("Node with data 15 not found.\n");
+        printf("Node with data 25 not found.\n");
 
     // Encontrar máximo e mínimo
     Node* min = minimum(root);
@@ -294,8 +297,38 @@ int main() {
     inorder(root);
     printf("\n");
 
-    freeTree(root);
+    // Inserir mais nós para testes adicionais
+    root = insert(root, createNode(5));
+    root = insert(root, createNode(35));
+    root = insert(root, createNode(40));
+    root = insert(root, createNode(1));
 
+    printf("Inorder traversal after more insertions: ");
+    inorder(root);
+    printf("\n");
+
+    // Verificar  a árvore rubro-negra após inserções adicionais
+    if (validateRedBlackTree(root))
+        printf("The tree is a valid red-black tree after more insertions.\n");
+    else
+        printf("The tree is NOT a valid red-black tree after more insertions.\n");
+
+    // Remover nós adicionais
+    nodeToRemove = search(root, 10);
+    if (nodeToRemove != NULL)
+        root = deleteNode(root, nodeToRemove);
+    printf("Inorder traversal after deleting 10: ");
+    inorder(root);
+    printf("\n");
+
+    // deleção apenas do 20 não funciona
+    nodeToRemove = search(root, 20);
+    if (nodeToRemove != NULL)
+        root = deleteNode(root, nodeToRemove);
+    printf("Inorder traversal after deleting 20: ");
+    inorder(root);
+    printf("\n");
+
+    freeTree(root);
     return 0;
 }
-
