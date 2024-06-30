@@ -1,7 +1,11 @@
 #include <iostream>
 #include <cstdlib>
+#include <chrono>
 
 using namespace std;
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+using std::chrono::nanoseconds;
 
 typedef enum { RED, BLACK } Color; // Enumeração para definir as cores dos nós
 
@@ -271,6 +275,55 @@ bool validateRedBlackTree(Node<T>* root) {
     int pathBlackCount = -1;
     return isRedBlackTree(root, 0, pathBlackCount); // Verifica se a árvore é uma árvore rubro-negra
 }
+
+// Função para criar uma lista de nós com valores aleatórios e inseri-los na árvore rubro-negra
+Node<int>* createRandomList(int iLength, int start, int stop) {
+    if (iLength <= 0 || start >= stop) {
+        return nullptr; 
+    }
+
+    srand((unsigned)time(0)); 
+
+    Node<int>* root = nullptr; 
+
+    for (int i = 0; i < iLength; ++i) {
+        int randomValue = (rand() % (stop - start)) + start; 
+        Node<int>* newNode = createNode(randomValue); 
+        root = insert(root, newNode); 
+    }
+
+    return root; 
+}    
+
+void testFunctionSearch(string function_name, Node<int>* (*searchFunc)(Node<int>*, int)) {
+    int mean = 0;
+    auto timeStart = high_resolution_clock::now();
+    auto timeStop = high_resolution_clock::now();
+    auto timeDuration = duration_cast<nanoseconds>(timeStop - timeStart);
+
+    Node<int>* current_head = nullptr;
+
+    cout << function_name << ",";
+    for(int i = 0; i < 100; i++) {
+        srand(i);
+        current_head = createRandomList(10000, 1, 10000);
+        for (int j = 0; j < 1000; j++) { // Executa 1000 buscas para ter uma média melhor
+            int random_key = (rand() % 10000) + 1; // Gera uma chave aleatória
+            timeStart = high_resolution_clock::now();
+            searchFunc(current_head, random_key);
+            timeStop = high_resolution_clock::now();
+            timeDuration = duration_cast<nanoseconds>(timeStop - timeStart);
+            cout << timeDuration.count() << ",";
+
+            mean += timeDuration.count();
+        }
+
+        mean /= 1000; // Média das 1000 buscas
+    }
+
+    cout << mean << endl;
+}
+
 int main() {
     Node<int>* root = nullptr;
 
@@ -348,6 +401,9 @@ int main() {
     cout << "\n";
 
     freeTree(root);
+
+    // Testes para o tempo de busca do search
+    //testFunctionSearch("Search", search<int>);
     
     return 0;
 }
