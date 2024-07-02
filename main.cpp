@@ -7,150 +7,150 @@ using chrono::high_resolution_clock;
 using chrono::duration_cast;
 using chrono::nanoseconds;
 
-typedef enum { RED, BLACK } Color; // Enumeração para definir as cores dos nós
+enum Color { RED, BLACK };
 
 template <typename T>
 struct Node {
-    T data;// Dados do nó
-    Color color;      // Cor do nó (RED ou BLACK)
-    Node *left, *right, *parent; // Ponteiros para o filho esquerdo, direito e pai
+    T data;
+    Color color;
+    Node *left, *right, *parent;
 };
 
 template <typename T>
 Node<T>* createNode(T data) {
-    Node<T>* newNode = (Node<T>*)malloc(sizeof(Node<T>)); 
+    Node<T>* newNode = new Node<T>();
     if (!newNode) {
         exit(1);
     }
-    newNode->data = data; 
-    newNode->color = RED; 
-    newNode->left = newNode->right = newNode->parent = nullptr; 
-    return newNode; 
+    newNode->data = data;
+    newNode->color = RED;
+    newNode->left = newNode->right = newNode->parent = nullptr;
+    return newNode;
 }
 
 template <typename T>
 Node<T>* rotateLeft(Node<T>* root, Node<T>* x) {
-    Node<T>* y = x->right; // Define y como o filho direito de x
-    if (!y) return root; // Retorna a raiz se y for null (checagem de segurança)
-    x->right = y->left; // Move o filho esquerdo de y para ser o filho direito de x
-    if (y->left != nullptr) y->left->parent = x; // Atualiza o pai do filho esquerdo de y
-    y->parent = x->parent; // Liga o pai de x a y
-    if (x->parent == nullptr) root = y; // Atualiza a raiz se x for a raiz original
-    else if (x == x->parent->left) x->parent->left = y; // Atualiza o filho esquerdo do pai de x
-    else x->parent->right = y; // Atualiza o filho direito do pai de x
-    y->left = x; // Coloca x à esquerda de y
-    x->parent = y; // Define y como pai de x
-    return root; // Retorna a raiz atualizada
+    Node<T>* y = x->right;
+    if (!y) return root;
+    x->right = y->left;
+    if (y->left != nullptr) y->left->parent = x;
+    y->parent = x->parent;
+    if (x->parent == nullptr) root = y;
+    else if (x == x->parent->left) x->parent->left = y;
+    else x->parent->right = y;
+    y->left = x;
+    x->parent = y;
+    return root;
 }
 
 template <typename T>
 Node<T>* rotateRight(Node<T>* root, Node<T>* x) {
-    Node<T>* y = x->left; // Define y como o filho esquerdo de x
-    if (!y) return root; // Retorna a raiz se y for null (checagem de segurança)
-    x->left = y->right; // Move o filho direito de y para ser o filho esquerdo de x
-    if (y->right != nullptr) y->right->parent = x; // Atualiza o pai do filho direito de y
-    y->parent = x->parent; // Liga o pai de x a y
-    if (x->parent == nullptr) root = y; // Atualiza a raiz se x for a raiz original
-    else if (x == x->parent->right) x->parent->right = y; // Atualiza o filho direito do pai de x
-    else x->parent->left = y; // Atualiza o filho esquerdo do pai de x
-    y->right = x; // Coloca x à direita de y
-    x->parent = y; // Define y como pai de x
-    return root; // Retorna a raiz atualizada
+    Node<T>* y = x->left;
+    if (!y) return root;
+    x->left = y->right;
+    if (y->right != nullptr) y->right->parent = x;
+    y->parent = x->parent;
+    if (x->parent == nullptr) root = y;
+    else if (x == x->parent->right) x->parent->right = y;
+    else x->parent->left = y;
+    y->right = x;
+    x->parent = y;
+    return root;
 }
 
 template <typename T>
 Node<T>* insertFixUp(Node<T>* root, Node<T>* z) {
-    while (z->parent != nullptr && z->parent->color == RED) { // Enquanto o pai de z for RED
-        if (z->parent == z->parent->parent->left) { // Se o pai de z for o filho esquerdo
-            Node<T>* y = z->parent->parent->right; 
-            if (y != nullptr && y->color == RED) { 
-                z->parent->color = BLACK; // Recolore o pai de z
-                y->color = BLACK; // Recolore o tio de z
-                z->parent->parent->color = RED; // Recolore o avô de z
-                z = z->parent->parent; // Move z para cima da árvore
+    while (z->parent != nullptr && z->parent->color == RED) {
+        if (z->parent == z->parent->parent->left) {
+            Node<T>* y = z->parent->parent->right;
+            if (y != nullptr && y->color == RED) {
+                z->parent->color = BLACK;
+                y->color = BLACK;
+                z->parent->parent->color = RED;
+                z = z->parent->parent;
             } else {
-                if (z == z->parent->right) { // Caso 2: z é filho direito
-                    z = z->parent; // Move z para o pai
-                    root = rotateLeft(root, z); // Rotaciona para a esquerda
+                if (z == z->parent->right) {
+                    z = z->parent;
+                    root = rotateLeft(root, z);
                 }
-                z->parent->color = BLACK; // Caso 3: z é filho esquerdo
-                z->parent->parent->color = RED; // Recolore o avô de z
-                root = rotateRight(root, z->parent->parent); // Rotaciona para a direita
+                z->parent->color = BLACK;
+                z->parent->parent->color = RED;
+                root = rotateRight(root, z->parent->parent);
             }
-        } else { // Casos simétricos
-            Node<T>* y = z->parent->parent->left; // y é o tio de z
-            if (y != nullptr && y->color == RED) { // Caso 1: tio é RED
-                z->parent->color = BLACK; // Recolore o pai de z
-                y->color = BLACK; // Recolore o tio de z
-                z->parent->parent->color = RED; // Recolore o avô de z
-                z = z->parent->parent; // Move z para cima da árvore
+        } else {
+            Node<T>* y = z->parent->parent->left;
+            if (y != nullptr && y->color == RED) {
+                z->parent->color = BLACK;
+                y->color = BLACK;
+                z->parent->parent->color = RED;
+                z = z->parent->parent;
             } else {
-                if (z == z->parent->left) { // Caso 2: z é filho esquerdo
-                    z = z->parent; // Move z para o pai
-                    root = rotateRight(root, z); // Rotaciona para a direita
+                if (z == z->parent->left) {
+                    z = z->parent;
+                    root = rotateRight(root, z);
                 }
-                z->parent->color = BLACK; // Caso 3: z é filho direito
-                z->parent->parent->color = RED; // Recolore o avô de z
-                root = rotateLeft(root, z->parent->parent); // Rotaciona para a esquerda
+                z->parent->color = BLACK;
+                z->parent->parent->color = RED;
+                root = rotateLeft(root, z->parent->parent);
             }
         }
     }
-    root->color = BLACK; // Garante que a raiz seja BLACK
-    return root; // Retorna a raiz atualizada
+    root->color = BLACK;
+    return root;
 }
 
 template <typename T>
 Node<T>* insert(Node<T>* root, Node<T>* z) {
     Node<T>* y = nullptr;
     Node<T>* x = root;
-    while (x != nullptr) { // Encontra a posição para inserir o novo nó
+    while (x != nullptr) {
         y = x;
         if (z->data < x->data) x = x->left;
         else x = x->right;
     }
-    z->parent = y; // Define o pai do novo nó
-    if (y == nullptr) root = z; // Se a árvore estava vazia, o novo nó é a raiz
-    else if (z->data < y->data) y->left = z; // Insere à esquerda
-    else y->right = z; // Insere à direita
-    return insertFixUp(root, z); // Ajusta a árvore
+    z->parent = y;
+    if (y == nullptr) root = z;
+    else if (z->data < y->data) y->left = z;
+    else y->right = z;
+    return insertFixUp(root, z);
 }
 
 template <typename T>
 Node<T>* minimum(Node<T>* node) {
-    while (node->left != nullptr) node = node->left; 
-    return node; 
+    while (node->left != nullptr) node = node->left;
+    return node;
 }
 
 template <typename T>
 Node<T>* maximum(Node<T>* node) {
-    while (node->right != nullptr) node = node->right; 
-    return node; 
+    while (node->right != nullptr) node = node->right;
+    return node;
 }
 
 template <typename T>
 int height(Node<T>* node) {
-    if (node == nullptr) return 0; // Se o nó for null, a altura é 0
-    int leftHeight = height(node->left); // Calcula a altura do filho esquerdo
-    int rightHeight = height(node->right); // Calcula a altura do filho direito
-    return 1 + (leftHeight > rightHeight ? leftHeight : rightHeight); // Retorna a altura maior entre os filhos + 1
+    if (node == nullptr) return 0;
+    int leftHeight = height(node->left);
+    int rightHeight = height(node->right);
+    return 1 + max(leftHeight, rightHeight);
 }
 
 template <typename T>
 void inorder(Node<T>* root) {
-    if (root != nullptr) { 
-        inorder(root->left); 
-        cout << root->data << " "; 
+    if (root != nullptr) {
+        inorder(root->left);
+        cout << root->data << " ";
         inorder(root->right);
     }
 }
 
 template <typename T>
 Node<T>* transplant(Node<T>* root, Node<T>* u, Node<T>* v) {
-    if (u->parent == nullptr) root = v; // Se u for a raiz, v se torna a nova raiz
-    else if (u == u->parent->left) u->parent->left = v; // Se u for o filho esquerdo, substitui pelo v
-    else u->parent->right = v; // Se u for o filho direito, substitui pelo v
-    if (v != nullptr) v->parent = u->parent; // Atualiza o pai de v
-    return root; // Retorna a raiz atualizada
+    if (u->parent == nullptr) root = v;
+    else if (u == u->parent->left) u->parent->left = v;
+    else u->parent->right = v;
+    if (v != nullptr) v->parent = u->parent;
+    return root;
 }
 
 template <typename T>
@@ -244,38 +244,34 @@ Node<T>* deleteNode(Node<T>* root, Node<T>* z) {
     return root;
 }
 
+
 template <typename T>
 Node<T>* search(Node<T>* root, T key) {
-    if (root == nullptr || root->data == key) return root; // Retorna o nó se encontrado ou null
-    if (key < root->data) return search(root->left, key); // Busca na subárvore esquerda
-    return search(root->right, key); // Busca na subárvore direita
+    if (root == nullptr || root->data == key) return root;
+    if (key < root->data) return search(root->left, key);
+    return search(root->right, key);
 }
 
 template <typename T>
 void freeTree(Node<T>* root) {
-    if (root == nullptr) return; // Se a raiz for null, retorna
-    freeTree(root->left); // Libera a subárvore esquerda
-    freeTree(root->right); // Libera a subárvore direita
-    free(root); // Libera o nó atual
+    if (root == nullptr) return;
+    freeTree(root->left);
+    freeTree(root->right);
+    delete root;
 }
 
 template <typename T>
-bool isRedBlackTree(Node<T>* node, int blackCount, int& pathBlackCount) {
-    if (node == nullptr) {
-        if (pathBlackCount == -1) pathBlackCount = blackCount; // Define a contagem de nós pretos no caminho
-        return blackCount == pathBlackCount; // Verifica se a contagem é consistente
+bool isValidRedBlackTree(Node<T>* root) {
+    if (root == nullptr) return true;
+
+    if (root->color == RED) {
+        if (root->left && root->left->color == RED)
+            return false;
+        if (root->right && root->right->color == RED)
+            return false;
     }
-    if (node->color == BLACK) blackCount++; // Incrementa a contagem de nós pretos
-    if (node->color == RED && node->parent->color == RED) return false; // Verifica a regra do nó vermelho
-    return isRedBlackTree(node->left, blackCount, pathBlackCount) && isRedBlackTree(node->right, blackCount, pathBlackCount); // Verifica recursivamente para as subárvores
-}
 
-template <typename T>
-bool validateRedBlackTree(Node<T>* root) {
-    if (root == nullptr) return true; // Uma árvore vazia é válida
-    if (root->color != BLACK) return false; // A raiz deve ser preta
-    int pathBlackCount = -1;
-    return isRedBlackTree(root, 0, pathBlackCount); // Verifica se a árvore é uma árvore rubro-negra
+    return isValidRedBlackTree(root->left) && isValidRedBlackTree(root->right);
 }
 
 /*
@@ -382,75 +378,46 @@ void testFunctionSearch(string function_name, Node<int>* (*searchFunc)(Node<int>
 int main() {
     Node<int>* root = nullptr;
 
+    root = insert(root, createNode(7));
+    root = insert(root, createNode(3));
+    root = insert(root, createNode(18));
     root = insert(root, createNode(10));
-    root = insert(root, createNode(20));
-    root = insert(root, createNode(30));
-    root = insert(root, createNode(15));
-    root = insert(root, createNode(25));
+    root = insert(root, createNode(22));
+    root = insert(root, createNode(8));
+    root = insert(root, createNode(11));
+    root = insert(root, createNode(26));
 
-    cout << "Inorder traversal: ";
+    cout << "Árvore Rubro-Negra (inorder traversal): ";
     inorder(root);
-    cout << "\n";
+    cout << endl;
 
-    if (validateRedBlackTree(root))
-        cout << "The tree is a valid red-black tree.\n";
-    else
-        cout << "The tree is NOT a valid red-black tree.\n";
+    root = deleteNode(root, search(root, 18));
 
-    Node<int>* found = search(root, 25);
-    if (found != nullptr)
-        cout << "Node with data 25 found.\n";
-    else
-        cout << "Node with data 25 not found.\n";
-
-    // Encontrar máximo e mínimo
-    Node<int>* min = minimum(root);
-    Node<int>* max = maximum(root);
-    cout << "Minimum: " << min->data << endl;
-    cout << "Maximum: " << max->data << endl;
-
-    // Calcular altura
-    cout << "Height: " << height(root) << endl;
-
-    // Remover um nó
-    Node<int>* nodeToRemove = search(root, 15);
-    if (nodeToRemove != nullptr)
-        root = deleteNode(root, nodeToRemove);
-    cout << "Inorder traversal after deletion: ";
+    cout << "Árvore Rubro-Negra após remover o nó 18 (inorder traversal): ";
     inorder(root);
-    cout << "\n";
+    cout << endl;
 
-    // Inserir mais nós para testes adicionais
     root = insert(root, createNode(5));
-    root = insert(root, createNode(35));
-    root = insert(root, createNode(40));
-    root = insert(root, createNode(1));
+    root = insert(root, createNode(15));
+    root = insert(root, createNode(30));
 
-    cout << "Inorder traversal after more insertions: ";
+    cout << "Árvore Rubro-Negra após inserir 5, 15, 30 (inorder traversal): ";
     inorder(root);
-    cout << "\n";
+    cout << endl;
 
-    // Verificar  a árvore rubro-negra após inserções adicionais
-    if (validateRedBlackTree(root))
-        cout << "The tree is a valid red-black tree after more insertions.\n";
-    else
-        cout << "The tree is NOT a valid red-black tree after more insertions.\n";
+    root = deleteNode(root, search(root, 7));
 
-    // Remover nós adicionais
-    nodeToRemove = search(root, 10);
-    if (nodeToRemove != nullptr)
-        root = deleteNode(root, nodeToRemove);
-    cout << "Inorder traversal after deleting 10: ";
+    cout << "Árvore Rubro-Negra após remover o nó 8 (inorder traversal): ";
     inorder(root);
-    cout << "\n";
+    cout << endl;
 
-    // deleção apenas do 20
-    nodeToRemove = search(root, 20);
-    if (nodeToRemove != nullptr)
-        root = deleteNode(root, nodeToRemove);
-    cout << "Inorder traversal after deleting 20: ";
-    inorder(root);
-    cout << "\n";
+    cout << "Altura da árvore: " << height(root) << endl;
+
+    if (isValidRedBlackTree(root)) {
+        cout << "Árvore Rubro-Negra válida." << endl;
+    } else {
+        cout << "Árvore Rubro-Negra inválida." << endl;
+    }
 
     freeTree(root);
 
