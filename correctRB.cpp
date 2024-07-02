@@ -335,7 +335,6 @@ void inorder(RedBlackTree* tree) {
     inOrderHelper(tree->root, tree->TNULL);
 }
 
-// Função auxiliar para verificar a altura negra de todas as folhas e a propriedade de não ter dois filhos vermelhos
 int checkRedBlackPropertiesHelper(Node* node, Node* TNULL, int height, int* black_height) {
     if (node == TNULL) {
         if (*black_height == -1) {
@@ -346,7 +345,7 @@ int checkRedBlackPropertiesHelper(Node* node, Node* TNULL, int height, int* blac
         return 1;
     }
 
-    // Verifica se um nó vermelho tem dois filhos pretos
+    // Verifica se um nó vermelho tem dois filhos vermelhos
     if (node->color == RED) {
         if ((node->left != TNULL && node->left->color == RED) ||
             (node->right != TNULL && node->right->color == RED)) {
@@ -362,10 +361,14 @@ int checkRedBlackPropertiesHelper(Node* node, Node* TNULL, int height, int* blac
            checkRedBlackPropertiesHelper(node->right, TNULL, height, black_height);
 }
 
-// Função para verificar se a árvore vermelho-preta é válida
 int isValidRedBlackTree(RedBlackTree* tree) {
     if (tree == NULL || tree->root == tree->TNULL) {
         return 1;
+    }
+
+    // Verifica se a raiz é preta
+    if (tree->root->color != BLACK) {
+        return 0;
     }
 
     int black_height = -1;
@@ -378,10 +381,10 @@ void printIndented(Node* root, char* indent, int last) {
     if (root != NULL) {
         printf("%s", indent);
         if (last) {
-            printf("\\-");
+            printf("└─");
             strcat(indent, "  ");
         } else {
-            printf("|-");
+            printf("├─");
             strcat(indent, "| ");
         }
         printf("%d (%s)\n", root->key, root->color == RED ? "RED" : "BLACK");
@@ -537,6 +540,21 @@ int main() {
         printf("Árvore Rubro-Negra VÁLIDA após remoção de 8.\n");
     } else {
         printf("Árvore Rubro-Negra INVÁLIDA após remoção de 8.\n");
+    }
+
+    deleteNode(&tree, 22);
+    deleteNode(&tree, 40);
+    deleteNode(&tree, 30);
+    deleteNode(&tree, 7);
+
+    printf("Árvore Rubro-Negra após remover o nós  22,40,30, 7(inorder traversal):\n");
+    inorder(&tree);
+    printf("\n");
+
+    if (isValidRedBlackTree(&tree)) {
+        printf("Árvore Rubro-Negra VÁLIDA após remoção de 22,40,30 e 7.\n");
+    } else {
+        printf("Árvore Rubro-Negra INVÁLIDA após remoção de 22,40,30 e 7.\n");
     }
 
     visualizeRedBlackTree(tree.root);
