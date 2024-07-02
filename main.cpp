@@ -3,9 +3,9 @@
 #include <chrono>
 
 using namespace std;
-using std::chrono::high_resolution_clock;
-using std::chrono::duration_cast;
-using std::chrono::nanoseconds;
+using chrono::high_resolution_clock;
+using chrono::duration_cast;
+using chrono::nanoseconds;
 
 typedef enum { RED, BLACK } Color; // Enumeração para definir as cores dos nós
 
@@ -155,91 +155,93 @@ Node<T>* transplant(Node<T>* root, Node<T>* u, Node<T>* v) {
 
 template <typename T>
 Node<T>* deleteFixUp(Node<T>* root, Node<T>* x) {
-    while (x != root && (x == nullptr || x->color == BLACK)) { // Enquanto x não for a raiz e for BLACK
-        if (x != nullptr && x->parent != nullptr && x == x->parent->left) { // Se x for filho esquerdo
-            Node<T>* w = x->parent->right; // w é o irmão de x
-            if (w->color == RED) { // Caso 1: w é RED
+    while (x != root && (x == nullptr || x->color == BLACK)) {
+        if (x == x->parent->left) {
+            Node<T>* w = x->parent->right;
+            if (w->color == RED) {
                 w->color = BLACK;
                 x->parent->color = RED;
-                root = rotateLeft(root, x->parent); // Rotaciona para a esquerda
+                root = rotateLeft(root, x->parent);
                 w = x->parent->right;
             }
-            if ((w->left == nullptr || w->left->color == BLACK) && (w->right == nullptr || w->right->color == BLACK)) { // Caso 2: w tem filhos BLACK
+            if ((w->left == nullptr || w->left->color == BLACK) &&
+                (w->right == nullptr || w->right->color == BLACK)) {
                 w->color = RED;
-                x = x->parent; // Move x para o pai
+                x = x->parent;
             } else {
-                if (w->right == nullptr || w->right->color == BLACK) { // Caso 3: w tem filho esquerdo RED
-                    if (w->left != nullptr) w->left->color = BLACK;
+                if (w->right == nullptr || w->right->color == BLACK) {
+                    w->left->color = BLACK;
                     w->color = RED;
-                    root = rotateRight(root, w); // Rotaciona para a direita
+                    root = rotateRight(root, w);
                     w = x->parent->right;
                 }
-                w->color = x->parent->color; // Caso 4: w tem filho direito RED
+                w->color = x->parent->color;
                 x->parent->color = BLACK;
-                if (w->right != nullptr) w->right->color = BLACK;
-                root = rotateLeft(root, x->parent); // Rotaciona para a esquerda
+                w->right->color = BLACK;
+                root = rotateLeft(root, x->parent);
                 x = root;
             }
-        } else { // Casos simétricos
-            Node<T>* w = x->parent->left; // w é o irmão de x
-            if (w->color == RED) { // Caso 1: w é RED
+        } else {
+            Node<T>* w = x->parent->left;
+            if (w->color == RED) {
                 w->color = BLACK;
                 x->parent->color = RED;
-                root = rotateRight(root, x->parent); // Rotaciona para a direita
+                root = rotateRight(root, x->parent);
                 w = x->parent->left;
             }
-            if ((w->left == nullptr || w->left->color == BLACK) && (w->right == nullptr || w->right->color == BLACK)) { // Caso 2: w tem filhos BLACK
+            if ((w->right == nullptr || w->right->color == BLACK) &&
+                (w->left == nullptr || w->left->color == BLACK)) {
                 w->color = RED;
-                x = x->parent; // Move x para o pai
+                x = x->parent;
             } else {
-                if (w->left == nullptr || w->left->color == BLACK) { // Caso 3: w tem filho direito RED
-                    if (w->right != nullptr) w->right->color = BLACK;
+                if (w->left == nullptr || w->left->color == BLACK) {
+                    w->right->color = BLACK;
                     w->color = RED;
-                    root = rotateLeft(root, w); // Rotaciona para a esquerda
+                    root = rotateLeft(root, w);
                     w = x->parent->left;
                 }
-                w->color = x->parent->color; // Caso 4: w tem filho esquerdo RED
+                w->color = x->parent->color;
                 x->parent->color = BLACK;
-                if (w->left != nullptr) w->left->color = BLACK;
-                root = rotateRight(root, x->parent); // Rotaciona para a direita
+                w->left->color = BLACK;
+                root = rotateRight(root, x->parent);
                 x = root;
             }
         }
     }
-    if (x != nullptr) x->color = BLACK; // Garante que x seja BLACK
-    return root; // Retorna a raiz atualizada
+    if (x != nullptr) x->color = BLACK;
+    return root;
 }
 
 template <typename T>
 Node<T>* deleteNode(Node<T>* root, Node<T>* z) {
-    Node<T>* y = z;
-    Node<T>* x;
-    Color yOriginalColor = y->color; // Guarda a cor original de y
-    if (z->left == nullptr) { // Se z não tem filho esquerdo
-        x = z->right; // x é o filho direito de z
-        root = transplant(root, z, z->right); // Transplanta z pelo seu filho direito
-    } else if (z->right == nullptr) { // Se z não tem filho direito
-        x = z->left; // x é o filho esquerdo de z
-        root = transplant(root, z, z->left); // Transplanta z pelo seu filho esquerdo
-    } else { // Se z tem ambos os filhos
-        y = minimum(z->right); // y é o menor nó da subárvore direita
-        yOriginalColor = y->color; // Guarda a cor original de y
-        x = y->right; // x é o filho direito de y
+    Node<T> *y = z, *x = nullptr;
+    Color yOriginalColor = y->color;
+    if (z->left == nullptr) {
+        x = z->right;
+        root = transplant(root, z, z->right);
+    } else if (z->right == nullptr) {
+        x = z->left;
+        root = transplant(root, z, z->left);
+    } else {
+        y = minimum(z->right);
+        yOriginalColor = y->color;
+        x = y->right;
         if (y->parent == z) {
-            if (x != nullptr) x->parent = y; // Atualiza o pai de x
+            if (x) x->parent = y;
         } else {
-            root = transplant(root, y, y->right); // Transplanta y pelo seu filho direito
-            y->right = z->right; // Define o filho direito de y como o filho direito de z
-            if (y->right != nullptr) y->right->parent = y; // Atualiza o pai do filho direito de y
+            root = transplant(root, y, y->right);
+            y->right = z->right;
+            if (y->right) y->right->parent = y;
         }
-        root = transplant(root, z, y); // Transplanta z por y
-        y->left = z->left; // Define o filho esquerdo de y como o filho esquerdo de z
-        if (y->left != nullptr) y->left->parent = y; // Atualiza o pai do filho esquerdo de y
-        y->color = z->color; // Mantém a cor de z em y
+        root = transplant(root, z, y);
+        y->left = z->left;
+        y->left->parent = y;
+        y->color = z->color;
     }
-    free(z); // Libera a memória do nó z
-    if (yOriginalColor == BLACK) root = deleteFixUp(root, x); // Ajusta a árvore se necessário
-    return root; // Retorna a raiz atualizada
+    if (yOriginalColor == BLACK && x != nullptr) 
+        root = deleteFixUp(root, x);
+    delete z;
+    return root;
 }
 
 template <typename T>
@@ -276,6 +278,7 @@ bool validateRedBlackTree(Node<T>* root) {
     return isRedBlackTree(root, 0, pathBlackCount); // Verifica se a árvore é uma árvore rubro-negra
 }
 
+/*
 // Função para criar uma lista de nós com valores aleatórios e inseri-los na árvore rubro-negra
 Node<int>* createRandomList(int iLength, int start, int stop) {
     if (iLength <= 0 || start >= stop) {
@@ -293,8 +296,27 @@ Node<int>* createRandomList(int iLength, int start, int stop) {
     }
 
     return root; 
-}    
+} 
+*/   
 
+// Função para criar uma lista de nós com valores aleatórios e inseri-los na árvore rubro-negra
+Node<int>* createRandomList(int iLength, int start, int stop) {
+    if (iLength <= 0 || start >= stop) {
+        return nullptr; 
+    }
+
+    Node<int>* root = nullptr; 
+
+    for (int i = 0; i < iLength; ++i) {
+        int randomValue = (rand() % (stop - start)) + start; 
+        Node<int>* newNode = createNode(randomValue); 
+        root = insert(root, newNode); 
+    }
+
+    return root; 
+}
+
+/*
 void testFunctionSearch(string function_name, Node<int>* (*searchFunc)(Node<int>*, int)) {
     int mean = 0;
     auto timeStart = high_resolution_clock::now();
@@ -322,6 +344,39 @@ void testFunctionSearch(string function_name, Node<int>* (*searchFunc)(Node<int>
     }
 
     cout << mean << endl;
+}
+*/
+
+void testFunctionSearch(string function_name, Node<int>* (*searchFunc)(Node<int>*, int)) {
+    const int numIterations = 10;
+    const int numSearches = 1000;
+
+    long long totalMean = 0;
+
+    // Inicializa a semente de randomização uma vez
+    srand((unsigned)time(0));
+
+    cout << function_name << ",";
+    for(int i = 0; i < numIterations; i++) {
+        Node<int>* current_head = createRandomList(10000, 1, 10000);
+        long long mean = 0;
+
+        for (int j = 0; j < numSearches; j++) {
+            int random_key = (rand() % 10000) + 1; // Gera uma chave aleatória
+
+            auto timeStart = high_resolution_clock::now();
+            searchFunc(current_head, random_key);
+            auto timeStop = high_resolution_clock::now();
+            auto timeDuration = duration_cast<nanoseconds>(timeStop - timeStart);
+            cout << timeDuration.count() << ",";
+
+            mean += timeDuration.count();
+        }
+
+        mean /= numSearches; // Calcula a média dos tempos de busca
+    }
+     
+    cout << totalMean << endl;
 }
 
 int main() {
@@ -389,10 +444,7 @@ int main() {
     inorder(root);
     cout << "\n";
 
-    // OBS: Ao inserir um número entre 20 e 29 o delete do 20 funciona
-    root = insert(root, createNode(27));
-
-    // deleção apenas do 20 não funciona
+    // deleção apenas do 20
     nodeToRemove = search(root, 20);
     if (nodeToRemove != nullptr)
         root = deleteNode(root, nodeToRemove);
@@ -404,6 +456,14 @@ int main() {
 
     // Testes para o tempo de busca do search
     //testFunctionSearch("Search", search<int>);
-    
+
+    /*
+    auto timeStart = high_resolution_clock::now();
+    search(root, 40);
+    auto timeStop = high_resolution_clock::now();
+    auto timeDuration = duration_cast<nanoseconds>(timeStop - timeStart);
+    cout << timeDuration.count() << ",";
+    */
+
     return 0;
 }
