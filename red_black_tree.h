@@ -5,7 +5,7 @@ using namespace std;
 
 typedef enum { RED, BLACK } Color;
 
-namespace dll
+namespace rbt
 {
     template <typename T>
     struct Node {

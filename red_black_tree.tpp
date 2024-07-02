@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include "red_black_tree.h"
 
-namespace dll
+namespace rbt
 {
     template <typename T>
     Node<T>* createNode(T data) {

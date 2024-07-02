@@ -1,16 +1,16 @@
 #include "red_black_tree.h"
 
 using namespace std;
-using namespace dll;
+using namespace rbt;
 
 int main() {
     Node<int>* root = nullptr;
 
-    root = insert(root, dll::createNode(10));
-    root = insert(root, dll::createNode(20));
-    root = insert(root, dll::createNode(30));
-    root = insert(root, dll::createNode(15));
-    root = insert(root, dll::createNode(25));
+    root = insert(root, rbt::createNode(10));
+    root = insert(root, rbt::createNode(20));
+    root = insert(root, rbt::createNode(30));
+    root = insert(root, rbt::createNode(15));
+    root = insert(root, rbt::createNode(25));
 
     cout << "Inorder traversal: ";
     inorder(root);
@@ -45,10 +45,10 @@ int main() {
     cout << "\n";
 
     // Inserir mais nós para testes adicionais
-    root = insert(root, dll::createNode(5));
-    root = insert(root, dll::createNode(35));
-    root = insert(root, dll::createNode(40));
-    root = insert(root, dll::createNode(1));
+    root = insert(root, rbt::createNode(5));
+    root = insert(root, rbt::createNode(35));
+    root = insert(root, rbt::createNode(40));
+    root = insert(root, rbt::createNode(1));
 
     cout << "Inorder traversal after more insertions: ";
     inorder(root);
@@ -69,7 +69,7 @@ int main() {
     cout << "\n";
 
     // OBS: Ao inserir um número entre 20 e 29 o delete do 20 funciona
-    root = insert(root, dll::createNode(27));
+    root = insert(root, rbt::createNode(27));
 
     // deleção apenas do 20 não funciona
     nodeToRemove = search(root, 20);
