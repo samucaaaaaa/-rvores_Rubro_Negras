@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <string> 
 #include <chrono>
 
 using namespace std;
@@ -159,7 +160,6 @@ Node<T>* transplant(Node<T>* root, Node<T>* u, Node<T>* v) {
     }
     return root;
 }
-
 template <typename T>
 Node<T>* deleteFixUp(Node<T>* root, Node<T>* x) {
     while (x != root && (x == nullptr || x->color == BLACK)) {
@@ -279,6 +279,7 @@ bool isValidRedBlackTree(Node<T>* root) {
     return validateRedBlackTree(root, blackHeight) && isRootBlack;
 }
 
+// Função auxiliar recursiva para validar a árvore Rubro-Negra
 template <typename T>
 bool validateRedBlackTree(Node<T>* node, int& blackHeight) {
     if (node == nullptr) {
@@ -289,6 +290,7 @@ bool validateRedBlackTree(Node<T>* node, int& blackHeight) {
     // Verifica se nenhum nó vermelho tem filhos vermelhos
     if (node->color == RED) {
         if ((node->left && node->left->color == RED) || (node->right && node->right->color == RED)) {
+            std::cout << "Red node " << node->data << " has red child." << std::endl;
             return false;
         }
 
@@ -317,12 +319,11 @@ bool validateRedBlackTree(Node<T>* node, int& blackHeight) {
     if (leftValid && rightValid && leftBlackHeight == rightBlackHeight) {
         blackHeight = leftBlackHeight + (node->color == BLACK ? 1 : 0);
         return true;
+    } else {
+        std::cout << "Black height mismatch for node " << node->data << std::endl;
+        return false;
     }
-
-    return false;
 }
-
-
 
 
 // Função para criar uma lista de nós com valores aleatórios e inseri-los na árvore rubro-negra
@@ -342,6 +343,38 @@ Node<int>* createRandomList(int iLength, int start, int stop) {
     return root; 
 }
 
+template <typename T>
+void printIndented(Node<T>* root, std::string indent = "", bool last = true) {
+    if (root == nullptr) {
+        return;
+    }
+
+    std::cout << indent;
+    if (last) {
+        std::cout << "└─";
+        indent += "  ";
+    } else {
+        std::cout << "├─";
+        indent += "│ ";
+    }
+
+    std::cout << root->data;
+    if (root->color == RED) {
+        std::cout << " (RED)";
+    } else {
+        std::cout << " (BLACK)";
+    }
+    std::cout << std::endl;
+
+    printIndented(root->right, indent, false);
+    printIndented(root->left, indent, true);
+}
+
+template <typename T>
+void visualizeRedBlackTree(Node<T>* root) {
+    std::cout << "Árvore Rubro-Negra (visualização top-down):" << std::endl;
+    printIndented(root);
+}
 
 int main() {
     Node<int>* root = nullptr;
@@ -373,6 +406,7 @@ int main() {
     root = insert(root, createNode(30));
     root = insert(root, createNode(2));
     root = insert(root, createNode(1));
+    visualizeRedBlackTree(root);
 
     cout << "Árvore Rubro-Negra após mais inserções (inorder traversal): ";
     inorder(root);
@@ -436,39 +470,69 @@ int main() {
         cout << "Árvore Rubro-Negra INVÁLIDA após inserções de 40 e 50." << endl;
     }
 
-    nodeToDelete = search(root, 3);
+    nodeToDelete = search(root, 2);
     if (nodeToDelete) {
         deleteNode(root, nodeToDelete);
     } else {
-        cout << "Node 3 not found for deletion." << endl;
+        cout << "Node 2 not found for deletion." << endl;
     }
 
-    cout << "Árvore Rubro-Negra após remover o nó 3 (inorder traversal): ";
+    cout << "Árvore Rubro-Negra após remover o nó 2 (inorder traversal): ";
     inorder(root);
     cout << endl;
 
     if (isValidRedBlackTree(root)) {
-        cout << "Árvore Rubro-Negra VÁLIDA após remoção de 3." << endl;
+        cout << "Árvore Rubro-Negra VÁLIDA após remoção de 2." << endl;
     } else {
-        cout << "Árvore Rubro-Negra INVÁLIDA após remoção de 3." << endl;
+        cout << "Árvore Rubro-Negra INVÁLIDA após remoção de 2." << endl;
     }
 
-    nodeToDelete = search(root, 7);
+    nodeToDelete = search(root, 30);
     if (nodeToDelete) {
         deleteNode(root, nodeToDelete);
     } else {
-        cout << "Node 7 not found for deletion." << endl;
+        cout << "Node 30 not found for deletion." << endl;
     }
 
-    cout << "Árvore Rubro-Negra após remover o nó 7 (inorder traversal): ";
+    cout << "Árvore Rubro-Negra após remover o nó 30 (inorder traversal): ";
     inorder(root);
     cout << endl;
 
     if (isValidRedBlackTree(root)) {
-        cout << "Árvore Rubro-Negra VÁLIDA após remoção de 7." << endl;
+        cout << "Árvore Rubro-Negra VÁLIDA após remoção de 30." << endl;
     } else {
-        cout << "Árvore Rubro-Negra INVÁLIDA após remoção de 7." << endl;
+        cout << "Árvore Rubro-Negra INVÁLIDA após remoção de 30." << endl;
     }
+
+    root = insert(root, createNode(30)); 
+    root = insert(root, createNode(2));
+    cout << "Árvore Rubro-Negra após após adição do 30 e 2 (inorder traversal): ";
+    inorder(root);
+    cout << endl;
+
+   if (isValidRedBlackTree(root)) {
+        cout << "Árvore Rubro-Negra VÁLIDA após adição do 30 e 2." << endl;
+    } else {
+        cout << "Árvore Rubro-Negra INVÁLIDA após adição d0 30 e 2." << endl;
+    }
+
+    nodeToDelete = search(root, 8);
+    if (nodeToDelete) {
+        deleteNode(root, nodeToDelete);
+    } else {
+        cout << "Node 8 not found for deletion." << endl;
+    }
+    visualizeRedBlackTree(root);
+
+    cout << "Árvore Rubro-Negra após remover o nó 8 (inorder traversal): ";
+    inorder(root);
+    cout << endl;
+    if (isValidRedBlackTree(root)) {
+        cout << "Árvore Rubro-Negra VÁLIDA após remoção de 8." << endl;
+    } else {
+        cout << "Árvore Rubro-Negra INVÁLIDA após remoção de 8." << endl;
+    }
+    visualizeRedBlackTree(root);
     return 0;
 }
 
