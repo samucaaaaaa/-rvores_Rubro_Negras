@@ -99,6 +99,7 @@ Node<T>* insertFixUp(Node<T>* root, Node<T>* z) {
     return root;
 }
 
+
 template <typename T>
 Node<T>* insert(Node<T>* root, Node<T>* z) {
     Node<T>* y = nullptr;
@@ -146,10 +147,16 @@ void inorder(Node<T>* root) {
 
 template <typename T>
 Node<T>* transplant(Node<T>* root, Node<T>* u, Node<T>* v) {
-    if (u->parent == nullptr) root = v;
-    else if (u == u->parent->left) u->parent->left = v;
-    else u->parent->right = v;
-    if (v != nullptr) v->parent = u->parent;
+    if (u->parent == nullptr) {
+        root = v;
+    } else if (u == u->parent->left) {
+        u->parent->left = v;
+    } else {
+        u->parent->right = v;
+    }
+    if (v != nullptr) {
+        v->parent = u->parent;
+    }
     return root;
 }
 
@@ -158,51 +165,53 @@ Node<T>* deleteFixUp(Node<T>* root, Node<T>* x) {
     while (x != root && (x == nullptr || x->color == BLACK)) {
         if (x == x->parent->left) {
             Node<T>* w = x->parent->right;
-            if (w->color == RED) {
+            if (w != nullptr && w->color == RED) {
                 w->color = BLACK;
                 x->parent->color = RED;
                 root = rotateLeft(root, x->parent);
                 w = x->parent->right;
             }
-            if ((w->left == nullptr || w->left->color == BLACK) &&
+            if (w == nullptr ||
+                (w->left == nullptr || w->left->color == BLACK) &&
                 (w->right == nullptr || w->right->color == BLACK)) {
-                w->color = RED;
+                if (w != nullptr) w->color = RED;
                 x = x->parent;
             } else {
-                if (w->right == nullptr || w->right->color == BLACK) {
-                    w->left->color = BLACK;
-                    w->color = RED;
+                if (w == nullptr || w->right == nullptr || w->right->color == BLACK) {
+                    if (w != nullptr && w->left != nullptr) w->left->color = BLACK;
+                    if (w != nullptr) w->color = RED;
                     root = rotateRight(root, w);
                     w = x->parent->right;
                 }
-                w->color = x->parent->color;
+                if (w != nullptr) w->color = x->parent->color;
                 x->parent->color = BLACK;
-                w->right->color = BLACK;
+                if (w != nullptr && w->right != nullptr) w->right->color = BLACK;
                 root = rotateLeft(root, x->parent);
                 x = root;
             }
         } else {
             Node<T>* w = x->parent->left;
-            if (w->color == RED) {
+            if (w != nullptr && w->color == RED) {
                 w->color = BLACK;
                 x->parent->color = RED;
                 root = rotateRight(root, x->parent);
                 w = x->parent->left;
             }
-            if ((w->right == nullptr || w->right->color == BLACK) &&
+            if (w == nullptr ||
+                (w->right == nullptr || w->right->color == BLACK) &&
                 (w->left == nullptr || w->left->color == BLACK)) {
-                w->color = RED;
+                if (w != nullptr) w->color = RED;
                 x = x->parent;
             } else {
-                if (w->left == nullptr || w->left->color == BLACK) {
-                    w->right->color = BLACK;
-                    w->color = RED;
+                if (w == nullptr || w->left == nullptr || w->left->color == BLACK) {
+                    if (w != nullptr && w->right != nullptr) w->right->color = BLACK;
+                    if (w != nullptr) w->color = RED;
                     root = rotateLeft(root, w);
                     w = x->parent->left;
                 }
-                w->color = x->parent->color;
+                if (w != nullptr) w->color = x->parent->color;
                 x->parent->color = BLACK;
-                w->left->color = BLACK;
+                if (w != nullptr && w->left != nullptr) w->left->color = BLACK;
                 root = rotateRight(root, x->parent);
                 x = root;
             }
@@ -211,6 +220,7 @@ Node<T>* deleteFixUp(Node<T>* root, Node<T>* x) {
     if (x != nullptr) x->color = BLACK;
     return root;
 }
+
 
 template <typename T>
 Node<T>* deleteNode(Node<T>* root, Node<T>* z) {
@@ -227,22 +237,23 @@ Node<T>* deleteNode(Node<T>* root, Node<T>* z) {
         yOriginalColor = y->color;
         x = y->right;
         if (y->parent == z) {
-            if (x) x->parent = y;
+            if (x != nullptr) x->parent = y;
         } else {
             root = transplant(root, y, y->right);
             y->right = z->right;
-            if (y->right) y->right->parent = y;
+            if (y->right != nullptr) y->right->parent = y;
         }
         root = transplant(root, z, y);
         y->left = z->left;
-        y->left->parent = y;
+        if (y->left != nullptr) y->left->parent = y;
         y->color = z->color;
     }
-    if (yOriginalColor == BLACK && x != nullptr) 
+    if (yOriginalColor == BLACK && x != nullptr) {
         root = deleteFixUp(root, x);
-    delete z;
+    }
     return root;
 }
+
 
 
 template <typename T>
@@ -262,26 +273,63 @@ void freeTree(Node<T>* root) {
 
 template <typename T>
 bool isValidRedBlackTree(Node<T>* root) {
-    if (root == nullptr) return true;
+    int blackHeight = -1; // Inicialização com valor inválido
+    bool isRootBlack = (root == nullptr) || (root->color == BLACK);
 
-    if (root->color == RED) {
-        if (root->left && root->left->color == RED)
-            return false;
-        if (root->right && root->right->color == RED)
-            return false;
-    }
-
-    return isValidRedBlackTree(root->left) && isValidRedBlackTree(root->right);
+    return validateRedBlackTree(root, blackHeight) && isRootBlack;
 }
 
-/*
+template <typename T>
+bool validateRedBlackTree(Node<T>* node, int& blackHeight) {
+    if (node == nullptr) {
+        blackHeight = 0; // Nó nulo contribui com altura preta 0
+        return true;
+    }
+
+    // Verifica se nenhum nó vermelho tem filhos vermelhos
+    if (node->color == RED) {
+        if ((node->left && node->left->color == RED) || (node->right && node->right->color == RED)) {
+            return false;
+        }
+
+        // Verifica se o pai de um nó vermelho não é vermelho
+        if (node->parent && node->parent->color == RED) {
+            std::cout << "Node " << node->data << " and parent " << node->parent->data << " are both RED." << std::endl;
+            return false;
+        }
+    }
+
+    // Verifica se o nó atual está apontando corretamente para o pai
+    if (node->left && node->left->parent != node) {
+        std::cout << "Node " << node->left->data << " has wrong parent, expected " << node->data << std::endl;
+        return false;
+    }
+    if (node->right && node->right->parent != node) {
+        std::cout << "Node " << node->right->data << " has wrong parent, expected " << node->data << std::endl;
+        return false;
+    }
+
+    // Verifica a altura dos nós pretos nos caminhos da raiz até as folhas
+    int leftBlackHeight, rightBlackHeight;
+    bool leftValid = validateRedBlackTree(node->left, leftBlackHeight);
+    bool rightValid = validateRedBlackTree(node->right, rightBlackHeight);
+
+    if (leftValid && rightValid && leftBlackHeight == rightBlackHeight) {
+        blackHeight = leftBlackHeight + (node->color == BLACK ? 1 : 0);
+        return true;
+    }
+
+    return false;
+}
+
+
+
+
 // Função para criar uma lista de nós com valores aleatórios e inseri-los na árvore rubro-negra
 Node<int>* createRandomList(int iLength, int start, int stop) {
     if (iLength <= 0 || start >= stop) {
         return nullptr; 
     }
-
-    srand((unsigned)time(0)); 
 
     Node<int>* root = nullptr; 
 
@@ -292,24 +340,136 @@ Node<int>* createRandomList(int iLength, int start, int stop) {
     }
 
     return root; 
-} 
-*/   
+}
 
-// Função para criar uma lista de nós com valores aleatórios e inseri-los na árvore rubro-negra
-Node<int>* createRandomList(int iLength, int start, int stop) {
-    if (iLength <= 0 || start >= stop) {
-        return nullptr; 
+
+int main() {
+    Node<int>* root = nullptr;
+
+    // Inserção de nós
+    root = insert(root, createNode(7));
+    root = insert(root, createNode(3));
+    root = insert(root, createNode(18));
+    root = insert(root, createNode(10));
+    root = insert(root, createNode(22));
+    root = insert(root, createNode(8));
+    root = insert(root, createNode(11));
+    root = insert(root, createNode(26));
+
+    cout << "Árvore Rubro-Negra (inorder traversal): ";
+    inorder(root);
+    cout << endl;
+
+    // Verifica a validade da árvore após inserção inicial
+    if (isValidRedBlackTree(root)) {
+        cout << "Árvore Rubro-Negra VÁLIDA após inserções iniciais." << endl;
+    } else {
+        cout << "Árvore Rubro-Negra inválida após inserções iniciais." << endl;
     }
 
-    Node<int>* root = nullptr; 
+    // Inserção de mais nós
+    root = insert(root, createNode(5));
+    root = insert(root, createNode(15));
+    root = insert(root, createNode(30));
+    root = insert(root, createNode(2));
+    root = insert(root, createNode(1));
 
-    for (int i = 0; i < iLength; ++i) {
-        int randomValue = (rand() % (stop - start)) + start; 
-        Node<int>* newNode = createNode(randomValue); 
-        root = insert(root, newNode); 
+    cout << "Árvore Rubro-Negra após mais inserções (inorder traversal): ";
+    inorder(root);
+    cout << endl;
+
+    // Verifica a validade da árvore após mais inserções
+    if (isValidRedBlackTree(root)) {
+        cout << "Árvore Rubro-Negra VÁLIDA após mais inserções." << endl;
+    } else {
+        cout << "Árvore Rubro-Negra INVÁLIDA após mais inserções." << endl;
     }
 
-    return root; 
+    // Exclusão de nós
+    Node<int>* nodeToDelete = search(root, 18);
+    if (nodeToDelete) {
+        deleteNode(root, nodeToDelete);
+    } else {
+        cout << "Node 18 not found for deletion." << endl;
+    }
+
+    cout << "Árvore Rubro-Negra após remover o nó 18 (inorder traversal): ";
+    inorder(root);
+    cout << endl;
+
+    // Verifica a validade da árvore após a remoção de 18
+    if (isValidRedBlackTree(root)) {
+        cout << "Árvore Rubro-Negra VÁLIDA após remoção de 18." << endl;
+    } else {
+        cout << "Árvore Rubro-Negra INVÁLIDA após remoção de 18." << endl;
+    }
+
+    // Mais exclusões
+    nodeToDelete = search(root, 26);
+    if (nodeToDelete) {
+        deleteNode(root, nodeToDelete);
+    } else {
+        cout << "Node 26 not found for deletion." << endl;
+    }
+
+    cout << "Árvore Rubro-Negra após remover o nó 26 (inorder traversal): ";
+    inorder(root);
+    cout << endl;
+
+    if (isValidRedBlackTree(root)) {
+        cout << "Árvore Rubro-Negra VÁLIDA após remoção de 26." << endl;
+    } else {
+        cout << "Árvore Rubro-Negra INVÁLIDA após remoção de 26." << endl;
+    }
+    // Testando casos de borda
+    root = insert(root, createNode(40)); 
+    root = insert(root, createNode(50));
+
+
+    cout << "Árvore Rubro-Negra após inserir 40 e 50 (inorder traversal): ";
+    inorder(root);
+    cout << endl;
+
+    if (isValidRedBlackTree(root)) {
+        cout << "Árvore Rubro-Negra VÁLIDA após inserções de 40 e 50." << endl;
+    } else {
+        cout << "Árvore Rubro-Negra INVÁLIDA após inserções de 40 e 50." << endl;
+    }
+
+    nodeToDelete = search(root, 3);
+    if (nodeToDelete) {
+        deleteNode(root, nodeToDelete);
+    } else {
+        cout << "Node 3 not found for deletion." << endl;
+    }
+
+    cout << "Árvore Rubro-Negra após remover o nó 3 (inorder traversal): ";
+    inorder(root);
+    cout << endl;
+
+    if (isValidRedBlackTree(root)) {
+        cout << "Árvore Rubro-Negra VÁLIDA após remoção de 3." << endl;
+    } else {
+        cout << "Árvore Rubro-Negra INVÁLIDA após remoção de 3." << endl;
+    }
+
+    nodeToDelete = search(root, 7);
+    if (nodeToDelete) {
+        deleteNode(root, nodeToDelete);
+    } else {
+        cout << "Node 7 not found for deletion." << endl;
+    }
+
+    cout << "Árvore Rubro-Negra após remover o nó 7 (inorder traversal): ";
+    inorder(root);
+    cout << endl;
+
+    if (isValidRedBlackTree(root)) {
+        cout << "Árvore Rubro-Negra VÁLIDA após remoção de 7." << endl;
+    } else {
+        cout << "Árvore Rubro-Negra INVÁLIDA após remoção de 7." << endl;
+    }
+    return 0;
 }
 
 /*
@@ -343,6 +503,8 @@ void testFunctionSearch(string function_name, Node<int>* (*searchFunc)(Node<int>
 }
 */
 
+
+/*
 void testFunctionSearch(string function_name, Node<int>* (*searchFunc)(Node<int>*, int)) {
     const int numIterations = 10;
     const int numSearches = 1000;
@@ -374,52 +536,7 @@ void testFunctionSearch(string function_name, Node<int>* (*searchFunc)(Node<int>
      
     cout << totalMean << endl;
 }
-
-int main() {
-    Node<int>* root = nullptr;
-
-    root = insert(root, createNode(7));
-    root = insert(root, createNode(3));
-    root = insert(root, createNode(18));
-    root = insert(root, createNode(10));
-    root = insert(root, createNode(22));
-    root = insert(root, createNode(8));
-    root = insert(root, createNode(11));
-    root = insert(root, createNode(26));
-
-    cout << "Árvore Rubro-Negra (inorder traversal): ";
-    inorder(root);
-    cout << endl;
-
-    root = deleteNode(root, search(root, 18));
-
-    cout << "Árvore Rubro-Negra após remover o nó 18 (inorder traversal): ";
-    inorder(root);
-    cout << endl;
-
-    root = insert(root, createNode(5));
-    root = insert(root, createNode(15));
-    root = insert(root, createNode(30));
-
-    cout << "Árvore Rubro-Negra após inserir 5, 15, 30 (inorder traversal): ";
-    inorder(root);
-    cout << endl;
-
-    root = deleteNode(root, search(root, 7));
-
-    cout << "Árvore Rubro-Negra após remover o nó 8 (inorder traversal): ";
-    inorder(root);
-    cout << endl;
-
-    cout << "Altura da árvore: " << height(root) << endl;
-
-    if (isValidRedBlackTree(root)) {
-        cout << "Árvore Rubro-Negra válida." << endl;
-    } else {
-        cout << "Árvore Rubro-Negra inválida." << endl;
-    }
-
-    freeTree(root);
+*/
 
     // Testes para o tempo de busca do search
     //testFunctionSearch("Search", search<int>);
@@ -431,6 +548,23 @@ int main() {
     auto timeDuration = duration_cast<nanoseconds>(timeStop - timeStart);
     cout << timeDuration.count() << ",";
     */
+/*
+// Função para criar uma lista de nós com valores aleatórios e inseri-los na árvore rubro-negra
+Node<int>* createRandomList(int iLength, int start, int stop) {
+    if (iLength <= 0 || start >= stop) {
+        return nullptr; 
+    }
 
-    return 0;
-}
+    srand((unsigned)time(0)); 
+
+    Node<int>* root = nullptr; 
+
+    for (int i = 0; i < iLength; ++i) {
+        int randomValue = (rand() % (stop - start)) + start; 
+        Node<int>* newNode = createNode(randomValue); 
+        root = insert(root, newNode); 
+    }
+
+    return root; 
+} 
+*/   
