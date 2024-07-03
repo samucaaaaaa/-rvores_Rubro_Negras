@@ -26,19 +26,6 @@ namespace rbt
     struct RedBlackTree {
         Node<T>* root;    // Raiz da árvore
         Node<T>* TNULL;   // Nó nulo (NIL)
-
-        /*
-        // Construtor da árvore
-        RedBlackTree() {
-            TNULL = createTNULL<T>();
-            root = TNULL;
-        }
-
-        // Destrutor para liberar a memória alocada
-        ~RedBlackTree() {
-            free(TNULL);
-        }
-        */
     };
 
     template <typename T>
