@@ -457,14 +457,14 @@ namespace rbt
     // Função para obter os tempos que a função de busca leva para encontrar vários nós
     template <typename T>
     void testFunctionSearch(string function_name, Node<T>* (*searchFunc)(RedBlackTree<T>*, T)) {
-        const int numIterations = 50;
+        const int numIterations = 30;
         const int numSearches = 10000;
 
         long long totalMean = 0;
 
         // Inicializa a semente de randomização uma vez
         srand((unsigned)time(0));
-
+        cout << "TESTES PARA OS TEMPOS DA FUNCAO searchTree:\n" << endl;
         for(int i = 0; i < numIterations; i++) {
             // Cria uma nova árvore rubro-negra para cada iteração
             RedBlackTree<int> tree;
@@ -492,5 +492,49 @@ namespace rbt
 
         totalMean /= numIterations; // Calcula a média total das médias
         cout << "Media Total dos tempos: " << totalMean << "ns" << endl; // Imprime a média total
+    }
+
+    // Função para obter os tempos que as funções maximum e minimum levam para encontrar os nós de várias árvores
+    template <typename T>
+    void testFunctionMaxMin(string function_name, Node<T>* (*searchFunc)(RedBlackTree<T>*, Node<T>*)) {
+        const int numIterations = 30;
+        const int numNodes = 100000;
+        const int numRepetitions = 10000; 
+
+        long long totalMean = 0;
+
+        // Inicializa a semente de randomização uma vez
+        srand(static_cast<unsigned>(time(0)));
+        cout << "TESTES PARA OS TEMPOS DA FUNCAO " << function_name << ":\n" << endl;
+
+        for (int i = 0; i < numIterations; i++) {
+            // Cria uma nova árvore rubro-negra para cada iteração
+            RedBlackTree<T> tree;
+            tree.TNULL = createTNULL<T>();
+            tree.root = tree.TNULL;
+
+            Node<T>* current_head = createRandomList(numNodes, 1, numNodes, &tree);
+            long long mean = 0;
+
+            // Executa a função de busca várias vezes por iteração
+            auto timeStart = high_resolution_clock::now();
+            for (int j = 0; j < numRepetitions; j++) {
+                searchFunc(&tree, tree.root);
+            }
+            auto timeStop = high_resolution_clock::now();
+            auto timeDuration = duration_cast<nanoseconds>(timeStop - timeStart);
+
+            mean = timeDuration.count() / numRepetitions;
+
+            totalMean += mean;
+            cout << "Tempo da iteracao " << i << ": " << mean << "ns" << endl; 
+
+            // Limpeza da árvore atual
+            freeTree(tree.root);
+        }
+
+        // Calcula a média total dos tempos
+        totalMean /= numIterations; 
+        cout << "Media Total dos tempos: " << totalMean << "ns" << endl; 
     }
 }

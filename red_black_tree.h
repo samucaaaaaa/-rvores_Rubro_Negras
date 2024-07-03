@@ -109,6 +109,9 @@ namespace rbt
 
     template <typename T>
     void testFunctionSearch(string, Node<T>* (*searchFunc)(RedBlackTree<T>*, T));
+
+    template <typename T>
+    void testFunctionMaxMin(string, Node<T>* (*searchFunc)(RedBlackTree<T>*, Node<T>*));
 }   
 
 #include "red_black_tree.tpp"
