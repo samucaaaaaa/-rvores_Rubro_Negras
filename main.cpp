@@ -123,50 +123,12 @@ int main() {
 
     cout << "-------------------------------------------------------------------\n" << endl;
 
-    // Testes após deletar outro nó
-    cout << "TESTES DEPOIS DE DELETAR OUTRO NODE:\n" << endl;
+    // Deletando alguns nós
     deleteNode(&tree, 2);
-
-    cout << "Arvore Rubro-Negra depois de remover o node 2 (inorder traversal):" << endl;
-    inorder(&tree);
-    cout << "\n";
-
-    if (isValidRedBlackTree(&tree)) {
-        cout << "Arvore Rubro-Negra VALIDA depois da remocao de 2." << endl;
-    } else {
-        cout << "Arvore Rubro-Negra INVALIDA depois da remocao de 2." << endl;
-    }
-
-    visualizeRedBlackTree(tree.root);
-
-    cout << "Altura da arvore(incluindo TNULL): " << height(tree.root) << endl;
-    cout << "\n";
-
-    cout << "-------------------------------------------------------------------\n" << endl;
-
-    // Testes após deletar outro nó
-    cout << "TESTES DEPOIS DE DELETAR OUTRO NODE:\n" << endl;
     deleteNode(&tree, 30);
 
-    cout << "Arvore Rubro-Negra depois de remover o node 30 (inorder traversal):" << endl;
-    inorder(&tree);
-    cout << "\n";
-
-    if (isValidRedBlackTree(&tree)) {
-        cout << "Arvore Rubro-Negra VALIDA depois da remocao de 30." << endl;
-    } else {
-        cout << "Arvore Rubro-Negra INVALIDA depois da remocao de 30." << endl;
-    }
-
-    visualizeRedBlackTree(tree.root);
-
-    cout << "Altura da arvore(incluindo TNULL): " << height(tree.root) << endl;
-    cout << "\n";
-
-    cout << "-------------------------------------------------------------------\n" << endl;
-
     // Testes após inserir mais nós
-    cout << "TESTES DEPOIS DE INSERIR MAIS NODES:\n" << endl;
+    cout << "TESTES DEPOIS DE DELETAR O 2 E O 30 E OS INSERIR NOVAMENTE:\n" << endl;
     insert(&tree, 30);
     insert(&tree, 2);
 
