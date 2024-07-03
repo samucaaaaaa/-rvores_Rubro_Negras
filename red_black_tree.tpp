@@ -436,4 +436,61 @@ namespace rbt
         freeTree(root->right);
         free(root);
     }
+
+    // Função para criar uma lista de nós com valores aleatórios
+    template <typename T>
+    Node<T>* createRandomList(int iLength, int start, int stop, RedBlackTree<T>* tree) {
+        if (iLength <= 0 || start >= stop) {
+            return tree->TNULL; 
+        }
+
+        srand((unsigned)time(0)); 
+
+        for (int i = 0; i < iLength; ++i) {
+            int randomValue = (rand() % (stop - start)) + start; 
+            insert(tree, randomValue); 
+        }
+
+        return tree->root; 
+    }
+
+    // Função para obter os tempos que a função de busca leva para encontrar vários nós
+    template <typename T>
+    void testFunctionSearch(string function_name, Node<T>* (*searchFunc)(RedBlackTree<T>*, T)) {
+        const int numIterations = 50;
+        const int numSearches = 10000;
+
+        long long totalMean = 0;
+
+        // Inicializa a semente de randomização uma vez
+        srand((unsigned)time(0));
+
+        for(int i = 0; i < numIterations; i++) {
+            // Cria uma nova árvore rubro-negra para cada iteração
+            RedBlackTree<int> tree;
+            tree.TNULL = createTNULL<T>();
+            tree.root = tree.TNULL;
+
+            Node<T>* current_head = createRandomList(100000, 1, 100000, &tree);
+            long long mean = 0;
+
+            for (int j = 0; j < numSearches; j++) {
+                int random_key = (rand() % 100000) + 1; // Gera uma chave aleatória
+
+                auto timeStart = high_resolution_clock::now();
+                searchFunc(&tree, random_key);
+                auto timeStop = high_resolution_clock::now();
+                auto timeDuration = duration_cast<nanoseconds>(timeStop - timeStart);
+
+                mean += timeDuration.count();
+            }
+
+            mean /= numSearches; // Calcula a média dos tempos de busca
+            totalMean += mean;
+            cout << "Tempo Medio da iteracao " << i << ": " << mean << "ns" << endl; // Imprime a média para esta iteração
+        }
+
+        totalMean /= numIterations; // Calcula a média total das médias
+        cout << "Media Total dos tempos: " << totalMean << "ns" << endl; // Imprime a média total
+    }
 }

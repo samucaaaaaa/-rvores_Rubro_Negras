@@ -202,6 +202,11 @@ int main() {
     visualizeRedBlackTree(tree.root);
 
     cout << "Altura da arvore(incluindo TNULL): " << height(tree.root) << endl;
+    cout << "\n";
+
+    // Testes para os tempos da função de busca
+    cout << "Testes para os tempos da funcao de busca" << endl;
+    testFunctionSearch("searchTree", searchTree<int>);
 
     return 0;
 }

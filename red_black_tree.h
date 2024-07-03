@@ -1,12 +1,7 @@
 #ifndef RED_BLACK_TREE_H
 #define RED_BLACK_TREE_H
 
-#include <chrono>
-
 using namespace std;
-using chrono::high_resolution_clock;
-using chrono::duration_cast;
-using chrono::nanoseconds;
 
 // Enumeração para cores dos nós da árvore
 typedef enum { RED, BLACK } Color;
@@ -108,6 +103,12 @@ namespace rbt
 
     template <typename T>
     void freeTree(Node<T>*);
+
+    template <typename T>
+    Node<T>* createRandomList(int, int, int, RedBlackTree<T>*);
+
+    template <typename T>
+    void testFunctionSearch(string, Node<T>* (*searchFunc)(RedBlackTree<T>*, T));
 }   
 
 #include "red_black_tree.tpp"
