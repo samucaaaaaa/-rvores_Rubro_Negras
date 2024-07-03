@@ -38,44 +38,44 @@ namespace rbt
         return newNode;
     }
 
-    // Função para realizar rotação à esquerda em torno do nó x
+    // Função para realizar rotação à esquerda em torno do nó pivo
     template <typename T>
-    void leftRotate(RedBlackTree<T>* tree, Node<T>* nodeX) {
-        Node<T>* nodeY = nodeX->right;
-        nodeX->right = nodeY->left;
-        if (nodeY->left != tree->TNULL) {
-            nodeY->left->parent = nodeX;
+    void leftRotate(RedBlackTree<T>* tree, Node<T>* pivotNode) {
+        Node<T>* rightChild = pivotNode->right;
+        pivotNode->right = rightChild->left;
+        if (rightChild->left != tree->TNULL) {
+            rightChild->left->parent = pivotNode;
         }
-        nodeY->parent = nodeX->parent;
-        if (nodeX->parent == nullptr) {
-            tree->root = nodeY;
-        } else if (nodeX == nodeX->parent->left) {
-            nodeX->parent->left = nodeY;
+        rightChild->parent = pivotNode->parent;
+        if (pivotNode->parent == nullptr) {
+            tree->root = rightChild;
+        } else if (pivotNode == pivotNode->parent->left) {
+            pivotNode->parent->left = rightChild;
         } else {
-            nodeX->parent->right = nodeY;
+            pivotNode->parent->right = rightChild;
         }
-        nodeY->left = nodeX;
-        nodeX->parent = nodeY;
+        rightChild->left = pivotNode;
+        pivotNode->parent = rightChild;
     }
 
-    // Função para realizar rotação à direita em torno do nó x
+    // Função para realizar rotação à direita em torno do nó pivo
     template <typename T>
-    void rightRotate(RedBlackTree<T>* tree, Node<T>* nodeX) {
-        Node<T>* nodeY = nodeX->left;
-        nodeX->left = nodeY->right;
-        if (nodeY->right != tree->TNULL) {
-            nodeY->right->parent = nodeX;
+    void rightRotate(RedBlackTree<T>* tree, Node<T>* pivotNode) {
+        Node<T>* leftChild = pivotNode->left;
+        pivotNode->left = leftChild->right;
+        if (leftChild->right != tree->TNULL) {
+            leftChild->right->parent = pivotNode;
         }
-        nodeY->parent = nodeX->parent;
-        if (nodeX->parent == nullptr) {
-            tree->root = nodeY;
-        } else if (nodeX == nodeX->parent->right) {
-            nodeX->parent->right = nodeY;
+        leftChild->parent = pivotNode->parent;
+        if (pivotNode->parent == nullptr) {
+            tree->root = leftChild;
+        } else if (pivotNode == pivotNode->parent->right) {
+            pivotNode->parent->right = leftChild;
         } else {
-            nodeX->parent->left = nodeY;
+            pivotNode->parent->left = leftChild;
         }
-        nodeY->right = nodeX;
-        nodeX->parent = nodeY;
+        leftChild->right = pivotNode;
+        pivotNode->parent = leftChild;
     }
 
     // Função para corrigir a árvore vermelho-preta após a inserção de um novo nó
@@ -217,74 +217,74 @@ namespace rbt
 
     // Função para corrigir a árvore vermelho-preta após a remoção de um nó 
     template <typename T>
-    void deleteFixUp(RedBlackTree<T>* tree, Node<T>* nodeX) {
-        while (nodeX != tree->root && nodeX->color == BLACK) {
-            if (nodeX == nodeX->parent->left) {
-                Node<T>* siblingNode = nodeX->parent->right;
+    void deleteFixUp(RedBlackTree<T>* tree, Node<T>* currentNode) {
+        while (currentNode != tree->root && currentNode->color == BLACK) {
+            if (currentNode == currentNode->parent->left) {
+                Node<T>* siblingNode = currentNode->parent->right;
                 if (siblingNode->color == RED) {
                     siblingNode->color = BLACK;
-                    nodeX->parent->color = RED;
-                    leftRotate(tree, nodeX->parent);
-                    siblingNode = nodeX->parent->right;
+                    currentNode->parent->color = RED;
+                    leftRotate(tree, currentNode->parent);
+                    siblingNode = currentNode->parent->right;
                 }
 
                 if (siblingNode->left->color == BLACK && siblingNode->right->color == BLACK) {
                     siblingNode->color = RED;
-                    nodeX = nodeX->parent;
+                    currentNode = currentNode->parent;
                 } else {
                     if (siblingNode->right->color == BLACK) {
                         siblingNode->left->color = BLACK;
                         siblingNode->color = RED;
                         rightRotate(tree, siblingNode);
-                        siblingNode = nodeX->parent->right;
+                        siblingNode = currentNode->parent->right;
                     }
-                    siblingNode->color = nodeX->parent->color;
-                    nodeX->parent->color = BLACK;
+                    siblingNode->color = currentNode->parent->color;
+                    currentNode->parent->color = BLACK;
                     siblingNode->right->color = BLACK;
-                    leftRotate(tree, nodeX->parent);
-                    nodeX = tree->root;
+                    leftRotate(tree, currentNode->parent);
+                    currentNode = tree->root;
                 }
             } else {
-                Node<T>* siblingNode = nodeX->parent->left;
+                Node<T>* siblingNode = currentNode->parent->left;
                 if (siblingNode->color == RED) {
                     siblingNode->color = BLACK;
-                    nodeX->parent->color = RED;
-                    rightRotate(tree, nodeX->parent);
-                    siblingNode = nodeX->parent->left;
+                    currentNode->parent->color = RED;
+                    rightRotate(tree, currentNode->parent);
+                    siblingNode = currentNode->parent->left;
                 }
 
                 if (siblingNode->right->color == BLACK && siblingNode->right->color == BLACK) {
                     siblingNode->color = RED;
-                    nodeX = nodeX->parent;
+                    currentNode = currentNode->parent;
                 } else {
                     if (siblingNode->left->color == BLACK) {
                         siblingNode->right->color = BLACK;
                         siblingNode->color = RED;
                         leftRotate(tree, siblingNode);
-                        siblingNode = nodeX->parent->left;
+                        siblingNode = currentNode->parent->left;
                     }
-                    siblingNode->color = nodeX->parent->color;
-                    nodeX->parent->color = BLACK;
+                    siblingNode->color = currentNode->parent->color;
+                    currentNode->parent->color = BLACK;
                     siblingNode->left->color = BLACK;
-                    rightRotate(tree, nodeX->parent);
-                    nodeX = tree->root;
+                    rightRotate(tree, currentNode->parent);
+                    currentNode = tree->root;
                 }
             }
         }
-        nodeX->color = BLACK;
+        currentNode->color = BLACK;
     }
 
     // Função auxiliar para deletar um nó com chave especificada na árvore
     template <typename T>
     void deleteNodeHelper(RedBlackTree<T>* tree, Node<T>* node, T key) {
-        Node<T>* nodeZ = tree->TNULL;
+        Node<T>* targetNode = tree->TNULL;
         Node<T>* currentNode = tree->root;
-        Node<T>* nodeY;
-        Node<T>* nodeX;
+        Node<T>* successorNode;
+        Node<T>* fixupNode;
 
         while (currentNode != tree->TNULL) {
             if (currentNode->key == key) {
-                nodeZ = currentNode;
+                targetNode = currentNode;
             }
             if (currentNode->key <= key) {
                 currentNode = currentNode->right;
@@ -293,38 +293,38 @@ namespace rbt
             }
         }
 
-        if (nodeZ == tree->TNULL) {
+        if (targetNode == tree->TNULL) {
             cout << "Nó com chave " << key << " não encontrado na árvore." << endl;
             return;
         }
 
-        nodeY = nodeZ;
-        int originalColor = nodeY->color;
-        if (nodeZ->left == tree->TNULL) {
-            nodeX = nodeZ->right;
-            rbTransplant(tree, nodeZ, nodeZ->right);
-        } else if (nodeZ->right == tree->TNULL) {
-            nodeX = nodeZ->left;
-            rbTransplant(tree, nodeZ, nodeZ->left);
+        successorNode = targetNode;
+        int originalColor = successorNode->color;
+        if (targetNode->left == tree->TNULL) {
+            fixupNode = targetNode->right;
+            rbTransplant(tree, targetNode, targetNode->right);
+        } else if (targetNode->right == tree->TNULL) {
+            fixupNode = targetNode->left;
+            rbTransplant(tree, targetNode, targetNode->left);
         } else {
-            nodeY = minimum(tree, nodeZ->right);
-            originalColor = nodeY->color;
-            nodeX = nodeY->right;
-            if (nodeY->parent == nodeZ) {
-                nodeX->parent = nodeY;
+            successorNode = minimum(tree, targetNode->right);
+            originalColor = successorNode->color;
+            fixupNode = successorNode->right;
+            if (successorNode->parent == targetNode) {
+                fixupNode->parent = successorNode;
             } else {
-                rbTransplant(tree, nodeY, nodeY->right);
-                nodeY->right = nodeZ->right;
-                nodeY->right->parent = nodeY;
+                rbTransplant(tree, successorNode, successorNode->right);
+                successorNode->right = targetNode->right;
+                successorNode->right->parent = successorNode;
             }
-            rbTransplant(tree, nodeZ, nodeY);
-            nodeY->left = nodeZ->left;
-            nodeY->left->parent = nodeY;
-            nodeY->color = nodeZ->color;
+            rbTransplant(tree, targetNode, successorNode);
+            successorNode->left = targetNode->left;
+            successorNode->left->parent = successorNode;
+            successorNode->color = targetNode->color;
         }
-        free(nodeZ);
+        free(targetNode);
         if (originalColor == BLACK) {
-            deleteFixUp(tree, nodeX);
+            deleteFixUp(tree, fixupNode);
         }
     }
 
