@@ -219,18 +219,18 @@ int height(Node<T>* node) {
 
 // Função auxiliar para imprimir a árvore em ordem
 template <typename T>
-void inOrderHelper(Node<T>* node, Node<T>* TNULL) {
+void inorderHelper(Node<T>* node, Node<T>* TNULL) {
     if (node != TNULL) {
-        inOrderHelper(node->left, TNULL);
+        inorderHelper(node->left, TNULL);
         cout << node->key << " ";
-        inOrderHelper(node->right, TNULL);
+        inorderHelper(node->right, TNULL);
     }
 }
 
 // Função para percorrer e imprimir a árvore em ordem
 template <typename T>
 void inorder(RedBlackTree<T>* tree) {
-    inOrderHelper(tree->root, tree->TNULL);
+    inorderHelper(tree->root, tree->TNULL);
 }
 
 // Função para realizar a substituição de um nó u por um nó v na árvore vermelho-preta
