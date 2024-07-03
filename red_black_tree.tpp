@@ -78,7 +78,7 @@ namespace rbt
         nodeX->parent = nodeY;
     }
 
-    // Função para corrigir a árvore vermelho-preta após a inserção de um novo nó k
+    // Função para corrigir a árvore vermelho-preta após a inserção de um novo nó
     template <typename T>
     void fixInsert(RedBlackTree<T>* tree, Node<T>* newNode) {
         while (newNode->parent->color == RED) {
@@ -202,7 +202,7 @@ namespace rbt
         inorderHelper(tree->root, tree->TNULL);
     }
 
-    // Função para realizar a substituição de um nó u por um nó v na árvore vermelho-preta
+    // Função para realizar a substituição de um nó por outro nó na árvore vermelho-preta
     template <typename T>
     void rbTransplant(RedBlackTree<T>* tree, Node<T>* nodeU, Node<T>* nodeV) {
         if (nodeU->parent == nullptr) {
@@ -215,7 +215,7 @@ namespace rbt
         nodeV->parent = nodeU->parent;
     }
 
-    // Função para corrigir a árvore vermelho-preta após a remoção de um nó x
+    // Função para corrigir a árvore vermelho-preta após a remoção de um nó 
     template <typename T>
     void deleteFixUp(RedBlackTree<T>* tree, Node<T>* nodeX) {
         while (nodeX != tree->root && nodeX->color == BLACK) {
