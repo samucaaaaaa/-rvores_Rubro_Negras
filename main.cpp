@@ -468,6 +468,64 @@ void freeTree(Node<T>* root) {
     free(root);
 }
 
+// Função para criar uma lista de nós com valores aleatórios
+template <typename T>
+Node<T>* createRandomList(int iLength, int start, int stop, RedBlackTree<T>* tree) {
+    if (iLength <= 0 || start >= stop) {
+        return tree->TNULL; 
+    }
+
+    srand((unsigned)time(0)); 
+
+    for (int i = 0; i < iLength; ++i) {
+        int randomValue = (rand() % (stop - start)) + start; 
+        insert(tree, randomValue); 
+    }
+
+    return tree->root; 
+}
+
+// Função para obter os tempos que a função de busca leva para encontrar vários nós
+template <typename T>
+void testFunctionSearch(string function_name, Node<T>* (*searchFunc)(RedBlackTree<T>*, T)) {
+    const int numIterations = 10;
+    const int numSearches = 1000;
+
+    long long totalMean = 0;
+
+    // Inicializa a semente de randomização uma vez
+    srand((unsigned)time(0));
+
+    cout << function_name << ",";
+    for(int i = 0; i < numIterations; i++) {
+        // Cria uma nova árvore rubro-negra para cada iteração
+        RedBlackTree<int> tree;
+        tree.TNULL = createTNULL<T>();
+        tree.root = tree.TNULL;
+
+        Node<T>* current_head = createRandomList(10000, 1, 10000, &tree);
+        long long mean = 0;
+
+        for (int j = 0; j < numSearches; j++) {
+            int random_key = (rand() % 10000) + 1; // Gera uma chave aleatória
+
+            auto timeStart = high_resolution_clock::now();
+            searchFunc(&tree, random_key);
+            auto timeStop = high_resolution_clock::now();
+            auto timeDuration = duration_cast<nanoseconds>(timeStop - timeStart);
+
+            mean += timeDuration.count();
+        }
+
+        mean /= numSearches; // Calcula a média dos tempos de busca
+        totalMean += mean;
+        cout << mean << ","; // Imprime a média para esta iteração
+    }
+
+    totalMean /= numIterations; // Calcula a média total das médias
+    cout << totalMean << endl; // Imprime a média total
+}
+
 int main() {
     RedBlackTree<int> tree;
     tree.TNULL = createTNULL<int>();
@@ -628,102 +686,8 @@ int main() {
 
     cout << "Altura da árvore(incluindo TNULL): " << height(tree.root) << endl;
 
+    // Testando a função de busca
+    testFunctionSearch("searchTree", searchTree<int>);
+
     return 0;
 }
-
-/*
-void testFunctionSearch(string function_name, Node<int>* (*searchFunc)(Node<int>*, int)) {
-    int mean = 0;
-    auto timeStart = high_resolution_clock::now();
-    auto timeStop = high_resolution_clock::now();
-    auto timeDuration = duration_cast<nanoseconds>(timeStop - timeStart);
-
-    Node<int>* current_head = nullptr;
-
-    cout << function_name << ",";
-    for(int i = 0; i < 100; i++) {
-        srand(i);
-        current_head = createRandomList(10000, 1, 10000);
-        for (int j = 0; j < 1000; j++) { // Executa 1000 buscas para ter uma média melhor
-            int random_key = (rand() % 10000) + 1; // Gera uma chave aleatória
-            timeStart = high_resolution_clock::now();
-            searchFunc(current_head, random_key);
-            timeStop = high_resolution_clock::now();
-            timeDuration = duration_cast<nanoseconds>(timeStop - timeStart);
-            cout << timeDuration.count() << ",";
-
-            mean += timeDuration.count();
-        }
-
-        mean /= 1000; // Média das 1000 buscas
-    }
-
-    cout << mean << endl;
-}
-*/
-
-
-/*
-void testFunctionSearch(string function_name, Node<int>* (*searchFunc)(Node<int>*, int)) {
-    const int numIterations = 10;
-    const int numSearches = 1000;
-
-    long long totalMean = 0;
-
-    // Inicializa a semente de randomização uma vez
-    srand((unsigned)time(0));
-
-    cout << function_name << ",";
-    for(int i = 0; i < numIterations; i++) {
-        Node<int>* current_head = createRandomList(10000, 1, 10000);
-        long long mean = 0;
-
-        for (int j = 0; j < numSearches; j++) {
-            int random_key = (rand() % 10000) + 1; // Gera uma chave aleatória
-
-            auto timeStart = high_resolution_clock::now();
-            searchFunc(current_head, random_key);
-            auto timeStop = high_resolution_clock::now();
-            auto timeDuration = duration_cast<nanoseconds>(timeStop - timeStart);
-            cout << timeDuration.count() << ",";
-
-            mean += timeDuration.count();
-        }
-
-        mean /= numSearches; // Calcula a média dos tempos de busca
-    }
-     
-    cout << totalMean << endl;
-}
-*/
-
-    // Testes para o tempo de busca do search
-    //testFunctionSearch("Search", search<int>);
-
-    /*
-    auto timeStart = high_resolution_clock::now();
-    search(root, 40);
-    auto timeStop = high_resolution_clock::now();
-    auto timeDuration = duration_cast<nanoseconds>(timeStop - timeStart);
-    cout << timeDuration.count() << ",";
-    */
-/*
-// Função para criar uma lista de nós com valores aleatórios e inseri-los na árvore rubro-negra
-Node<int>* createRandomList(int iLength, int start, int stop) {
-    if (iLength <= 0 || start >= stop) {
-        return nullptr; 
-    }
-
-    srand((unsigned)time(0)); 
-
-    Node<int>* root = nullptr; 
-
-    for (int i = 0; i < iLength; ++i) {
-        int randomValue = (rand() % (stop - start)) + start; 
-        Node<int>* newNode = createNode(randomValue); 
-        root = insert(root, newNode); 
-    }
-
-    return root; 
-} 
-*/   
