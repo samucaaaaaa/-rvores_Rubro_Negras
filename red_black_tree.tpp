@@ -10,112 +10,124 @@ using chrono::nanoseconds;
 
 namespace rbt
 {
+#include <iostream>
+#include <cstdlib>
+#include <chrono>
+#include <string.h>
+#include "red_black_tree.h"
+
+using chrono::high_resolution_clock;
+using chrono::duration_cast;
+using chrono::nanoseconds;
+
+namespace rbt
+{
     // Função para criar e inicializar um nó nulo (NIL)
     template <typename T>
     Node<T>* createTNULL() {
-        Node<T>* TNULL = (Node<T>*)malloc(sizeof(Node<T>));
-        if (TNULL == nullptr) {
+        Node<T>* nullNode = (Node<T>*)malloc(sizeof(Node<T>));
+        if (nullNode == nullptr) {
             cerr << "Falha na alocação de memória" << endl;
             exit(1);
         }
-        TNULL->key = T();        // Inicializa a chave com o valor padrão de T
-        TNULL->color = BLACK;    // Nó nulo é sempre preto
-        TNULL->parent = nullptr;
-        TNULL->left = nullptr;
-        TNULL->right = nullptr;
-        return TNULL;
+        nullNode->key = T();        // Inicializa a chave com o valor padrão de T
+        nullNode->color = BLACK;    // Nó nulo é sempre preto
+        nullNode->parent = nullptr;
+        nullNode->left = nullptr;
+        nullNode->right = nullptr;
+        return nullNode;
     }
 
     // Função para criar um novo nó com chave especificada e cor vermelha
     template <typename T>
-    Node<T>* createNode(T key, Node<T>* TNULL) {
-        Node<T>* node = (Node<T>*)malloc(sizeof(Node<T>));
-        node->key = key;
-        node->parent = nullptr;
-        node->left = TNULL;
-        node->right = TNULL;
-        node->color = RED;  // Novo nó é inicializado como vermelho
-        return node;
+    Node<T>* createNode(T key, Node<T>* nullNode) {
+        Node<T>* newNode = (Node<T>*)malloc(sizeof(Node<T>));
+        newNode->key = key;
+        newNode->parent = nullptr;
+        newNode->left = nullNode;
+        newNode->right = nullNode;
+        newNode->color = RED;  // Novo nó é inicializado como vermelho
+        return newNode;
     }
 
     // Função para realizar rotação à esquerda em torno do nó x
     template <typename T>
-    void leftRotate(RedBlackTree<T>* tree, Node<T>* x) {
-        Node<T>* y = x->right;
-        x->right = y->left;
-        if (y->left != tree->TNULL) {
-            y->left->parent = x;
+    void leftRotate(RedBlackTree<T>* tree, Node<T>* nodeX) {
+        Node<T>* nodeY = nodeX->right;
+        nodeX->right = nodeY->left;
+        if (nodeY->left != tree->TNULL) {
+            nodeY->left->parent = nodeX;
         }
-        y->parent = x->parent;
-        if (x->parent == nullptr) {
-            tree->root = y;
-        } else if (x == x->parent->left) {
-            x->parent->left = y;
+        nodeY->parent = nodeX->parent;
+        if (nodeX->parent == nullptr) {
+            tree->root = nodeY;
+        } else if (nodeX == nodeX->parent->left) {
+            nodeX->parent->left = nodeY;
         } else {
-            x->parent->right = y;
+            nodeX->parent->right = nodeY;
         }
-        y->left = x;
-        x->parent = y;
+        nodeY->left = nodeX;
+        nodeX->parent = nodeY;
     }
 
     // Função para realizar rotação à direita em torno do nó x
     template <typename T>
-    void rightRotate(RedBlackTree<T>* tree, Node<T>* x) {
-        Node<T>* y = x->left;
-        x->left = y->right;
-        if (y->right != tree->TNULL) {
-            y->right->parent = x;
+    void rightRotate(RedBlackTree<T>* tree, Node<T>* nodeX) {
+        Node<T>* nodeY = nodeX->left;
+        nodeX->left = nodeY->right;
+        if (nodeY->right != tree->TNULL) {
+            nodeY->right->parent = nodeX;
         }
-        y->parent = x->parent;
-        if (x->parent == nullptr) {
-            tree->root = y;
-        } else if (x == x->parent->right) {
-            x->parent->right = y;
+        nodeY->parent = nodeX->parent;
+        if (nodeX->parent == nullptr) {
+            tree->root = nodeY;
+        } else if (nodeX == nodeX->parent->right) {
+            nodeX->parent->right = nodeY;
         } else {
-            x->parent->left = y;
+            nodeX->parent->left = nodeY;
         }
-        y->right = x;
-        x->parent = y;
+        nodeY->right = nodeX;
+        nodeX->parent = nodeY;
     }
 
     // Função para corrigir a árvore vermelho-preta após a inserção de um novo nó k
     template <typename T>
-    void fixInsert(RedBlackTree<T>* tree, Node<T>* k) {
-        while (k->parent->color == RED) {
-            if (k->parent == k->parent->parent->right) {
-                Node<T>* u = k->parent->parent->left;
-                if (u->color == RED) {
-                    u->color = BLACK;
-                    k->parent->color = BLACK;
-                    k->parent->parent->color = RED;
-                    k = k->parent->parent;
+    void fixInsert(RedBlackTree<T>* tree, Node<T>* newNode) {
+        while (newNode->parent->color == RED) {
+            if (newNode->parent == newNode->parent->parent->right) {
+                Node<T>* uncleNode = newNode->parent->parent->left;
+                if (uncleNode->color == RED) {
+                    uncleNode->color = BLACK;
+                    newNode->parent->color = BLACK;
+                    newNode->parent->parent->color = RED;
+                    newNode = newNode->parent->parent;
                 } else {
-                    if (k == k->parent->left) {
-                        k = k->parent;
-                        rightRotate(tree, k);
+                    if (newNode == newNode->parent->left) {
+                        newNode = newNode->parent;
+                        rightRotate(tree, newNode);
                     }
-                    k->parent->color = BLACK;
-                    k->parent->parent->color = RED;
-                    leftRotate(tree, k->parent->parent);
+                    newNode->parent->color = BLACK;
+                    newNode->parent->parent->color = RED;
+                    leftRotate(tree, newNode->parent->parent);
                 }
             } else {
-                Node<T>* u = k->parent->parent->right;
-                if (u->color == RED) {
-                    u->color = BLACK;
-                    k->parent->color = BLACK;
-                    k->parent->parent->color = RED;
-                    k = k->parent->parent;
+                Node<T>* uncleNode = newNode->parent->parent->right;
+                if (uncleNode->color == RED) {
+                    uncleNode->color = BLACK;
+                    newNode->parent->color = BLACK;
+                    newNode->parent->parent->color = RED;
+                    newNode = newNode->parent->parent;
                 } else {
-                    if (k == k->parent->right) {
-                        k = k->parent;
-                        leftRotate(tree, k);
+                    if (newNode == newNode->parent->right) {
+                        newNode = newNode->parent;
+                        leftRotate(tree, newNode);
                     }
-                    k->parent->color = BLACK;
-                    k->parent->parent->color = RED;
-                    rightRotate(tree, k->parent->parent);
+                    newNode->parent->color = BLACK;
+                    newNode->parent->parent->color = RED;
+                    rightRotate(tree, newNode->parent->parent);
                 }
             }
-            if (k == tree->root) {
+            if (newNode == tree->root) {
                 break;
             }
         }
@@ -125,74 +137,74 @@ namespace rbt
     // Função para inserir um novo nó com chave especificada na árvore vermelho-preta
     template <typename T>
     void insert(RedBlackTree<T>* tree, T key) {
-        Node<T>* node = createNode(key, tree->TNULL);
-        Node<T>* y = nullptr;
-        Node<T>* x = tree->root;
+        Node<T>* newNode = createNode(key, tree->TNULL);
+        Node<T>* parentNode = nullptr;
+        Node<T>* currentNode = tree->root;
 
-        while (x != tree->TNULL) {
-            y = x;
-            if (node->key < x->key) {
-                x = x->left;
+        while (currentNode != tree->TNULL) {
+            parentNode = currentNode;
+            if (newNode->key < currentNode->key) {
+                currentNode = currentNode->left;
             } else {
-                x = x->right;
+                currentNode = currentNode->right;
             }
         }
 
-        node->parent = y;
-        if (y == nullptr) {
-            tree->root = node;
-        } else if (node->key < y->key) {
-            y->left = node;
+        newNode->parent = parentNode;
+        if (parentNode == nullptr) {
+            tree->root = newNode;
+        } else if (newNode->key < parentNode->key) {
+            parentNode->left = newNode;
         } else {
-            y->right = node;
+            parentNode->right = newNode;
         }
 
-        if (node->parent == nullptr) {
-            node->color = BLACK;  // Se o novo nó é raiz, garante que seja preto
+        if (newNode->parent == nullptr) {
+            newNode->color = BLACK;  // Se o novo nó é raiz, garante que seja preto
             return;
         }
 
-        if (node->parent->parent == nullptr) {
+        if (newNode->parent->parent == nullptr) {
             return;
         }
 
-        fixInsert(tree, node);  // Corrige a árvore após a inserção
+        fixInsert(tree, newNode);  // Corrige a árvore após a inserção
     }
 
     // Função para encontrar o nó com valor mínimo na árvore a partir de um dado nó
     template <typename T>
-    Node<T>* minimum(RedBlackTree<T>* tree, Node<T>* node) {
-        while (node->left != tree->TNULL) {
-            node = node->left;
+    Node<T>* minimum(RedBlackTree<T>* tree, Node<T>* currentNode) {
+        while (currentNode->left != tree->TNULL) {
+            currentNode = currentNode->left;
         }
-        return node;
+        return currentNode;
     }
 
     // Função para encontrar o nó com valor máximo na árvore a partir de um dado nó
     template <typename T>
-    Node<T>* maximum(RedBlackTree<T>* tree, Node<T>* node) {
-        while (node->right != tree->TNULL) {
-            node = node->right;
+    Node<T>* maximum(RedBlackTree<T>* tree, Node<T>* currentNode) {
+        while (currentNode->right != tree->TNULL) {
+            currentNode = currentNode->right;
         }
-        return node;
+        return currentNode;
     }
 
     // Função para calcular a altura da árvore
     template <typename T>
-    int height(Node<T>* node) {
-        if (node == nullptr) return 0;
-        int leftHeight = height(node->left);
-        int rightHeight = height(node->right);
+    int height(Node<T>* currentNode) {
+        if (currentNode == nullptr) return 0;
+        int leftHeight = height(currentNode->left);
+        int rightHeight = height(currentNode->right);
         return 1 + max(leftHeight, rightHeight);
     }
 
     // Função auxiliar para imprimir a árvore em ordem
     template <typename T>
-    void inorderHelper(Node<T>* node, Node<T>* TNULL) {
-        if (node != TNULL) {
-            inorderHelper(node->left, TNULL);
-            cout << node->key << " ";
-            inorderHelper(node->right, TNULL);
+    void inorderHelper(Node<T>* currentNode, Node<T>* nullNode) {
+        if (currentNode != nullNode) {
+            inorderHelper(currentNode->left, nullNode);
+            cout << currentNode->key << " ";
+            inorderHelper(currentNode->right, nullNode);
         }
     }
 
@@ -204,130 +216,130 @@ namespace rbt
 
     // Função para realizar a substituição de um nó u por um nó v na árvore vermelho-preta
     template <typename T>
-    void rbTransplant(RedBlackTree<T>* tree, Node<T>* u, Node<T>* v) {
-        if (u->parent == nullptr) {
-            tree->root = v;
-        } else if (u == u->parent->left) {
-            u->parent->left = v;
+    void rbTransplant(RedBlackTree<T>* tree, Node<T>* nodeU, Node<T>* nodeV) {
+        if (nodeU->parent == nullptr) {
+            tree->root = nodeV;
+        } else if (nodeU == nodeU->parent->left) {
+            nodeU->parent->left = nodeV;
         } else {
-            u->parent->right = v;
+            nodeU->parent->right = nodeV;
         }
-        v->parent = u->parent;
+        nodeV->parent = nodeU->parent;
     }
 
     // Função para corrigir a árvore vermelho-preta após a remoção de um nó x
     template <typename T>
-    void deleteFixUp(RedBlackTree<T>* tree, Node<T>* x) {
-        while (x != tree->root && x->color == BLACK) {
-            if (x == x->parent->left) {
-                Node<T>* s = x->parent->right;
-                if (s->color == RED) {
-                    s->color = BLACK;
-                    x->parent->color = RED;
-                    leftRotate(tree, x->parent);
-                    s = x->parent->right;
+    void deleteFixUp(RedBlackTree<T>* tree, Node<T>* nodeX) {
+        while (nodeX != tree->root && nodeX->color == BLACK) {
+            if (nodeX == nodeX->parent->left) {
+                Node<T>* siblingNode = nodeX->parent->right;
+                if (siblingNode->color == RED) {
+                    siblingNode->color = BLACK;
+                    nodeX->parent->color = RED;
+                    leftRotate(tree, nodeX->parent);
+                    siblingNode = nodeX->parent->right;
                 }
 
-                if (s->left->color == BLACK && s->right->color == BLACK) {
-                    s->color = RED;
-                    x = x->parent;
+                if (siblingNode->left->color == BLACK && siblingNode->right->color == BLACK) {
+                    siblingNode->color = RED;
+                    nodeX = nodeX->parent;
                 } else {
-                    if (s->right->color == BLACK) {
-                        s->left->color = BLACK;
-                        s->color = RED;
-                        rightRotate(tree, s);
-                        s = x->parent->right;
+                    if (siblingNode->right->color == BLACK) {
+                        siblingNode->left->color = BLACK;
+                        siblingNode->color = RED;
+                        rightRotate(tree, siblingNode);
+                        siblingNode = nodeX->parent->right;
                     }
-
-                    s->color = x->parent->color;
-                    x->parent->color = BLACK;
-                    s->right->color = BLACK;
-                    leftRotate(tree, x->parent);
-                    x = tree->root;
+                    siblingNode->color = nodeX->parent->color;
+                    nodeX->parent->color = BLACK;
+                    siblingNode->right->color = BLACK;
+                    leftRotate(tree, nodeX->parent);
+                    nodeX = tree->root;
                 }
             } else {
-                Node<T>* s = x->parent->left;
-                if (s->color == RED) {
-                    s->color = BLACK;
-                    x->parent->color = RED;
-                    rightRotate(tree, x->parent);
-                    s = x->parent->left;
+                Node<T>* siblingNode = nodeX->parent->left;
+                if (siblingNode->color == RED) {
+                    siblingNode->color = BLACK;
+                    nodeX->parent->color = RED;
+                    rightRotate(tree, nodeX->parent);
+                    siblingNode = nodeX->parent->left;
                 }
 
-                if (s->right->color == BLACK && s->left->color == BLACK) {
-                    s->color = RED;
-                    x = x->parent;
+                if (siblingNode->right->color == BLACK && siblingNode->right->color == BLACK) {
+                    siblingNode->color = RED;
+                    nodeX = nodeX->parent;
                 } else {
-                    if (s->left->color == BLACK) {
-                        s->right->color = BLACK;
-                        s->color = RED;
-                        leftRotate(tree, s);
-                        s = x->parent->left;
+                    if (siblingNode->left->color == BLACK) {
+                        siblingNode->right->color = BLACK;
+                        siblingNode->color = RED;
+                        leftRotate(tree, siblingNode);
+                        siblingNode = nodeX->parent->left;
                     }
-
-                    s->color = x->parent->color;
-                    x->parent->color = BLACK;
-                    s->left->color = BLACK;
-                    rightRotate(tree, x->parent);
-                    x = tree->root;
+                    siblingNode->color = nodeX->parent->color;
+                    nodeX->parent->color = BLACK;
+                    siblingNode->left->color = BLACK;
+                    rightRotate(tree, nodeX->parent);
+                    nodeX = tree->root;
                 }
             }
         }
-        x->color = BLACK;  // Garante que x seja preto após a correção
+        nodeX->color = BLACK;
     }
 
-    // Função auxiliar para deletar um nó com chave especificada na árvore
+    // Função para remover um nó com chave especificada da árvore vermelho-preta
     template <typename T>
-    void deleteNodeHelper(RedBlackTree<T>* tree, Node<T>* node, T key) {
-        Node<T>* z = tree->TNULL;
-        Node<T>* x, *y;
-        while (node != tree->TNULL) {
-            if (node->key == key) {
-                z = node;
-            }
+    void deleteNodeHelper(RedBlackTree<T>* tree, T key) {
+        Node<T>* nodeZ = tree->TNULL;
+        Node<T>* currentNode = tree->root;
+        Node<T>* nodeY;
+        Node<T>* nodeX;
 
-            if (node->key <= key) {
-                node = node->right;
+        while (currentNode != tree->TNULL) {
+            if (currentNode->key == key) {
+                nodeZ = currentNode;
+            }
+            if (currentNode->key <= key) {
+                currentNode = currentNode->right;
             } else {
-                node = node->left;
+                currentNode = currentNode->left;
             }
         }
 
-        if (z == tree->TNULL) {
-            cout << "Chave não encontrada na árvore" << endl;
+        if (nodeZ == tree->TNULL) {
+            cout << "Nó com chave " << key << " não encontrado na árvore." << endl;
             return;
         }
 
-        y = z;
-        Color y_original_color = y->color;
-        if (z->left == tree->TNULL) {
-            x = z->right;
-            rbTransplant(tree, z, z->right);
-        } else if (z->right == tree->TNULL) {
-            x = z->left;
-            rbTransplant(tree, z, z->left);
+        nodeY = nodeZ;
+        int originalColor = nodeY->color;
+        if (nodeZ->left == tree->TNULL) {
+            nodeX = nodeZ->right;
+            rbTransplant(tree, nodeZ, nodeZ->right);
+        } else if (nodeZ->right == tree->TNULL) {
+            nodeX = nodeZ->left;
+            rbTransplant(tree, nodeZ, nodeZ->left);
         } else {
-            y = minimum(tree, z->right);
-            y_original_color = y->color;
-            x = y->right;
-            if (y->parent == z) {
-                x->parent = y;
+            nodeY = minimum(tree, nodeZ->right);
+            originalColor = nodeY->color;
+            nodeX = nodeY->right;
+            if (nodeY->parent == nodeZ) {
+                nodeX->parent = nodeY;
             } else {
-                rbTransplant(tree, y, y->right);
-                y->right = z->right;
-                y->right->parent = y;
+                rbTransplant(tree, nodeY, nodeY->right);
+                nodeY->right = nodeZ->right;
+                nodeY->right->parent = nodeY;
             }
-
-            rbTransplant(tree, z, y);
-            y->left = z->left;
-            y->left->parent = y;
-            y->color = z->color;
+            rbTransplant(tree, nodeZ, nodeY);
+            nodeY->left = nodeZ->left;
+            nodeY->left->parent = nodeY;
+            nodeY->color = nodeZ->color;
         }
-        free(z);
-        if (y_original_color == BLACK) {
-            deleteFixUp(tree, x);
+        free(nodeZ);
+        if (originalColor == BLACK) {
+            deleteFixUp(tree, nodeX);
         }
     }
+}
 
     // Função para deletar um nó com chave especificada na árvore vermelho-preta
     template <typename T>
