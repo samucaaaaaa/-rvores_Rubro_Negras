@@ -18,15 +18,15 @@ namespace rbt
         Color color;      // Cor do nó (vermelho ou preto)
     };
 
-    template <typename T>
-    Node<T>* createTNULL();
-
     // Estrutura da árvore vermelho-preta
     template <typename T>
     struct RedBlackTree {
         Node<T>* root;    // Raiz da árvore
         Node<T>* TNULL;   // Nó nulo (NIL)
     };
+
+    template <typename T>
+    Node<T>* createTNULL();
 
     template <typename T>
     Node<T>* createNode(T, Node<T>*);   
