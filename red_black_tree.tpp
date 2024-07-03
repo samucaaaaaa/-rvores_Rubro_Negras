@@ -10,18 +10,6 @@ using chrono::nanoseconds;
 
 namespace rbt
 {
-#include <iostream>
-#include <cstdlib>
-#include <chrono>
-#include <string.h>
-#include "red_black_tree.h"
-
-using chrono::high_resolution_clock;
-using chrono::duration_cast;
-using chrono::nanoseconds;
-
-namespace rbt
-{
     // Função para criar e inicializar um nó nulo (NIL)
     template <typename T>
     Node<T>* createTNULL() {
@@ -286,9 +274,9 @@ namespace rbt
         nodeX->color = BLACK;
     }
 
-    // Função para remover um nó com chave especificada da árvore vermelho-preta
+    // Função auxiliar para deletar um nó com chave especificada na árvore
     template <typename T>
-    void deleteNodeHelper(RedBlackTree<T>* tree, T key) {
+    void deleteNodeHelper(RedBlackTree<T>* tree, Node<T>* node, T key) {
         Node<T>* nodeZ = tree->TNULL;
         Node<T>* currentNode = tree->root;
         Node<T>* nodeY;
@@ -339,7 +327,6 @@ namespace rbt
             deleteFixUp(tree, nodeX);
         }
     }
-}
 
     // Função para deletar um nó com chave especificada na árvore vermelho-preta
     template <typename T>
@@ -441,14 +428,6 @@ namespace rbt
         printIndented(root, indent, 1);
     }
 
-    template <typename T>
-    void freeTree(Node<T>* root) {
-        if (root == nullptr) return;
-        freeTree(root->left);
-        freeTree(root->right);
-        free(root);
-    }
-
     // Função para criar uma lista de nós com valores aleatórios
     template <typename T>
     Node<T>* createRandomList(int iLength, int start, int stop, RedBlackTree<T>* tree) {
@@ -540,9 +519,6 @@ namespace rbt
 
             totalMean += mean;
             cout << "Tempo da iteracao " << i << ": " << mean << "ns" << endl; 
-
-            // Limpeza da árvore atual
-            freeTree(tree.root);
         }
 
         // Calcula a média total dos tempos

@@ -89,9 +89,6 @@ namespace rbt
     void visualizeRedBlackTree(Node<T>*);
 
     template <typename T>
-    void freeTree(Node<T>*);
-
-    template <typename T>
     Node<T>* createRandomList(int, int, int, RedBlackTree<T>*);
 
     template <typename T>
