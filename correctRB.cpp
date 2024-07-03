@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
+using namespace std;
 
 // Enumeração para cores dos nós da árvore
 typedef enum { RED, BLACK } Color;
@@ -21,6 +23,7 @@ typedef struct {
 } RedBlackTree;
 
 // Função para criar um nó nulo (NIL) com cor preta
+//https://en.wikipedia.org/wiki/Red%E2%80%93black_tree#Terminology
 Node* createTNULL() {
     Node* TNULL = (Node*)malloc(sizeof(Node));
     TNULL->color = BLACK;  // Nó nulo é sempre preto
@@ -248,6 +251,13 @@ Node* searchTreeHelper(Node* node, int key, Node* TNULL) {
     }
 
     return searchTreeHelper(node->right, key, TNULL);
+}
+
+int height(Node* node) {
+    if (node == nullptr) return 0;
+    int leftHeight = height(node->left);
+    int rightHeight = height(node->right);
+    return 1 + std::max(leftHeight, rightHeight);
 }
 
 // Função para buscar um nó com chave especificada na árvore vermelho-preta
@@ -542,22 +552,8 @@ int main() {
         printf("Árvore Rubro-Negra INVÁLIDA após remoção de 8.\n");
     }
 
-    deleteNode(&tree, 22);
-    deleteNode(&tree, 40);
-    deleteNode(&tree, 30);
-    deleteNode(&tree, 7);
-
-    printf("Árvore Rubro-Negra após remover o nós  22,40,30, 7(inorder traversal):\n");
-    inorder(&tree);
-    printf("\n");
-
-    if (isValidRedBlackTree(&tree)) {
-        printf("Árvore Rubro-Negra VÁLIDA após remoção de 22,40,30 e 7.\n");
-    } else {
-        printf("Árvore Rubro-Negra INVÁLIDA após remoção de 22,40,30 e 7.\n");
-    }
 
     visualizeRedBlackTree(tree.root);
-
+    cout << "Altura da árvore(incluindo TNULL): " << height(tree.root) << endl;
     return 0;
 }
